@@ -7,6 +7,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { config } from 'dotenv';
 import { User } from './entities/user.entity';
+import { CacheModule } from '@nestjs/cache-manager';
+import { redisStore } from 'cache-manager-redis-store';
+
 
 config();
 
@@ -25,6 +28,18 @@ config();
       database: process.env.DB_NAME,
       entities: [User],
       synchronize: true,
+    }),
+    CacheModule.register({
+      isGlobal: true,
+      inject: [ConfigService],
+      store: (): any =>
+        redisStore({
+          commandsQueueMaxLength: 10_000,
+          socket: {
+            host: process.env.REDIS_HOST,
+            port: +process.env.REDIS_PORT,
+          },
+        }),
     }),
     JwtModule.register({
       global: true,

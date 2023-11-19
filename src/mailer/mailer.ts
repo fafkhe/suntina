@@ -17,8 +17,8 @@ export async function sendEmail(email:string,code:string) {
   const info = await transporter.sendMail({
     from: 'fatemeh.khorshidvand1@gmail.com',
     to: email,
-    subject: 'verification code',
-    html: `<b>your verification code is:${code}</b>`,
+    subject: 'VERIFICATION CODE',
+    html: `<b>Here is your verification code: ${code}</b>`,
   });
   console.log('Message sent: %s', info.messageId);
 }
