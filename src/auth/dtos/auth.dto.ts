@@ -5,8 +5,6 @@ export class AuthStepOneDto {
   @IsString()
   email: string;
 
-  @IsString()
-  name: string;
 }
 
 export class AuthStepTwoDto {

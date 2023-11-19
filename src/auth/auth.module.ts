@@ -3,6 +3,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/entities/user.entity';
+import { jwtAuthMiddleware } from './jwt.middleware';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User])],
@@ -11,6 +12,6 @@ import { User } from 'src/entities/user.entity';
 })
 export class AuthModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply().forRoutes('*');
+    consumer.apply(jwtAuthMiddleware).forRoutes('*');
   }
 }

@@ -9,7 +9,6 @@ import { validateEmail } from './utils/validateEmail';
 import { JwtService } from '@nestjs/jwt';
 import { Cache } from 'cache-manager';
 
-
 @Injectable()
 export class AuthService {
   constructor(
@@ -26,7 +25,30 @@ export class AuthService {
     return String(res);
   }
 
+  #generateToken({ id, role, isMaster }) {
+    return this.jwtService.sign({ id, role, isMaster });
+  }
 
+  async #readSingleUserFromCache(id: number): Promise<User | null> {
+    try {
+      let target = `user-${String(id)}`;
+
+      let thisUser = (await this.cacheManager.get(target)) as User;
+
+      if (!thisUser) {
+        thisUser = await this.userRepo.findOne({
+          where: {
+            id,
+          },
+        });
+        if (thisUser) await this.cacheManager.set(target, thisUser, 600 * 1000);
+      }
+
+      return thisUser;
+    } catch (error) {
+      return null;
+    }
+  }
 
   async authStepOne(data: AuthStepOneDto) {
     const code = this.#generateNumericString(4);
@@ -41,11 +63,11 @@ export class AuthService {
   }
 
   async authStepTwo(data: AuthStepTwoDto) {
-    const theCode = await this.cacheManager.get(`auth-${data.email}`); 
+    const theCode = await this.cacheManager.get(`auth-${data.email}`);
 
-    if (!theCode || theCode !== data.code) 
-      throw new BadRequestException("the provided code doesnt match")
-    
+    if (!theCode || theCode !== data.code)
+      throw new BadRequestException('the provided code doesnt match');
+
     let thisUser = await this.userRepo.findOne({
       where: {
         email: data.email,
@@ -53,7 +75,24 @@ export class AuthService {
     });
     if (!thisUser) {
       thisUser = this.userRepo.create({ ...data });
-      await this.userRepo.save(thisUser); 
+      await this.userRepo.save(thisUser);
     }
+    const token = this.#generateToken({
+      id: thisUser.id,
+      role: thisUser.role,
+      isMaster: thisUser.isMaster,
+    });
+    console.log('can you see me?????im here', token); //
+
+    return { token };
+  }
+
+  async findById(id: number) {
+    const thisUser = await this.#readSingleUserFromCache(id);
+    console.log(thisUser,"thisUser")
+    if (!thisUser)
+      throw new BadRequestException('there is no user with this ID!!');
+    return thisUser;
+
   }
 }
