@@ -17,7 +17,7 @@ import { ApiResponse, ApiTags, ApiHeader } from '@nestjs/swagger';
 import { apiResponseStepOneDto } from './dtos/authResponse.dto';
 import { apiResponseSteptwoDto } from './dtos/authResponse.dto';
 import { responseMeDto } from './dtos/response-me.dto';
-
+import { Serialize } from 'src/interceptors/serialize.interceptor';
 
 @Controller('auth')
 export class AuthController {
@@ -41,15 +41,15 @@ export class AuthController {
     return this.authService.authStepTwo(body);
   }
 
-
   @UseGuards(AuthGuard)
   @ApiResponse({
     status: 201,
     type: responseMeDto,
   })
+  @Serialize(responseMeDto)
   @Get('/me')
   me(@Me() me: User) {
-    console.log("me is called")
+    console.log('me is called');
     return me;
   }
 }
