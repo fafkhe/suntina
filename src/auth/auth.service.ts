@@ -8,6 +8,7 @@ import { sendEmail } from 'src/mailer/mailer';
 import { validateEmail } from './utils/validateEmail';
 import { JwtService } from '@nestjs/jwt';
 import { Cache } from 'cache-manager';
+import { editProfileDto } from './dtos/edit-profile.dto';
 
 @Injectable()
 export class AuthService {
@@ -94,5 +95,17 @@ export class AuthService {
       throw new BadRequestException('there is no user with this ID!!');
     return thisUser;
 
+  }
+
+  async editprofile(id:number,data:editProfileDto) {
+    const thisUser = await this.userRepo.findOne({
+      where: {
+        id: data.id,
+      },
+    });
+
+    const newUser = await this.userRepo.save({ id, ...data });
+
+    return "ok";
   }
 }

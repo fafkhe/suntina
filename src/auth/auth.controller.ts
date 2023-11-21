@@ -18,6 +18,8 @@ import { apiResponseStepOneDto } from './dtos/authResponse.dto';
 import { apiResponseSteptwoDto } from './dtos/authResponse.dto';
 import { responseMeDto } from './dtos/response-me.dto';
 import { Serialize } from 'src/interceptors/serialize.interceptor';
+import { editProfileDto } from './dtos/edit-profile.dto';
+import { responseEditProfile } from './dtos/edit-profile.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -39,6 +41,17 @@ export class AuthController {
   @Post('/step-two')
   auth_step_two(@Body() body: AuthStepTwoDto) {
     return this.authService.authStepTwo(body);
+  }
+
+  @Serialize(responseMeDto)
+  @UseGuards(AuthGuard)
+  @ApiResponse({
+    status: 201,
+    type: responseEditProfile,
+  })
+  @Post('/edit/:id')
+  editProfile(@Param('id') id: string, @Body() body: editProfileDto) {
+    return this.authService.editprofile(+id, body);
   }
 
   @UseGuards(AuthGuard)
