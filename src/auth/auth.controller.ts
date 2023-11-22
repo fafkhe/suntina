@@ -77,4 +77,22 @@ export class AuthController {
   async createAdmin(@Body() body: craeteAdminDto) {
     return this.authService.createAdmin(body);
   }
+
+  @Post('/admin/step_one')
+  @ApiResponse({
+    status: 201,
+    type: apiResponseStepOneDto,
+  })
+  auth_admin_step_one(@Body() body: AuthStepOneDto) {
+    return this.authService.auth_admin_step_one(body);
+  }
+
+  @ApiResponse({
+    status: 201,
+    type: apiResponseSteptwoDto,
+  })
+  @Post('/admin/step_two')
+  auth_admin_step_two(@Body() body: AuthStepTwoDto) {
+    return this.authService.auth_admin_step_two(body);
+  }
 }

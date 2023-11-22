@@ -17,12 +17,12 @@ export class AuthService {
     @InjectRepository(User) private userRepo: Repository<User>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private jwtService: JwtService,
-  ) { }
+  ) {}
 
   #generateNumericString(length: number): string {
     const res = Array.from({ length }).reduce((acc) => {
-      return acc + String(Math.floor(Math.random() * 9));
       return acc + '1';
+      return acc + String(Math.floor(Math.random() * 9));
     }, '');
     return String(res);
   }
@@ -86,6 +86,7 @@ export class AuthService {
     });
     console.log('can you see me?????im here', token); //
 
+
     return { token };
   }
 
@@ -104,7 +105,8 @@ export class AuthService {
       },
     });
 
-    const newUser = await this.userRepo.save({ id, ...data });
+    const newUser = await this.userRepo.save({ id, ...data });4
+    this.cacheManager.del(`user-${String(id)}`);
 
     return 'ok';
   }
@@ -122,8 +124,53 @@ export class AuthService {
     await this.userRepo.save(thisAdmin);
 
     return 'ok';
+  }
 
+  async auth_admin_step_one(data: AuthStepOneDto) {
+    const code = this.#generateNumericString(4);
+    await this.cacheManager.set(`auth-${data.email}`, code, 180 * 1000);
+    // console.log('code', code);
 
+    const thisAdmin = await this.userRepo.findOne({
+      where: {
+        email: data.email,
+      },
+    });
 
+    if (!thisAdmin) {
+      throw new BadRequestException('admin is not exist!!');
+    }
+
+    if (thisAdmin.role !== 'admin')
+      throw new BadRequestException('forbiden!!!');
+
+    if (data) {
+      sendEmail(data.email, code);
+    }
+
+    return 'we will send the code to your gmail account!';
+  }
+  async auth_admin_step_two(data: AuthStepTwoDto) {
+    const theCode = await this.cacheManager.get(`auth-${data.email}`);
+    if (!theCode || theCode !== data.code)
+      throw new BadRequestException('the provided code doesnt match');
+
+    let thisAdmin = await this.userRepo.findOne({
+      where: {
+        email: data.email,
+      },
+    });
+
+    const token = this.#generateToken({
+      id: thisAdmin.id,
+      role: thisAdmin.role,
+      isMaster: thisAdmin.isMaster,
+    });
+
+    this.cacheManager.del(`auth-${data.email}`);
+
+    return {
+      token,
+    };
   }
 }
