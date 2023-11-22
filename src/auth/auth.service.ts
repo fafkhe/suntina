@@ -10,6 +10,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Cache } from 'cache-manager';
 import { editProfileDto } from './dtos/edit-profile.dto';
 import { craeteAdminDto } from './dtos/createAdmin.dto';
+import { UserQueryDto } from './dtos/UsersQuery.dto';
 
 @Injectable()
 export class AuthService {
@@ -112,6 +113,18 @@ export class AuthService {
     this.cacheManager.del(`user-${String(id)}`);
 
     return 'ok';
+  }
+
+  async AllUsers(data: UserQueryDto) {
+    // const theseUsers = await this.userRepo.find({});
+
+    console.log(data.name);
+    const name = data.name || '';
+    return this.userRepo.manager.query(
+      'SELECT * FROM public.user WHERE LOWER(public.user.name) LIKE $1 OFFSET $2 ROWS FETCH NEXT $3 ROWS ONLY',
+      [`%${name}%`, 1, 1],
+    );
+
   }
 
   async createAdmin(data: craeteAdminDto) {

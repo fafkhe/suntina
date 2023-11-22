@@ -22,6 +22,7 @@ import { editProfileDto } from './dtos/edit-profile.dto';
 import { responseEditProfile } from './dtos/edit-profile.dto';
 import { craeteAdminDto } from './dtos/createAdmin.dto';
 import { AuthMasterGuard } from './gaurds/auth-master.guard';
+import { UserQueryDto } from './dtos/UsersQuery.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -78,6 +79,10 @@ export class AuthController {
     return this.authService.createAdmin(body);
   }
 
+  @Get('/getAllUsers')
+  getAlLusers(@Query() query:UserQueryDto ) {
+    return this.authService.AllUsers(query)
+  }
   
   @UseGuards(AuthMasterGuard)
   @Get('/delete/:id')

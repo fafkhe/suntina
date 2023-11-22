@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, Index } from 'typeorm';
 
 export enum UserRole {
   ADMIN = 'admin',
@@ -10,6 +10,7 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Index({ fulltext: true })
   @Column({
     default: '',
   })
