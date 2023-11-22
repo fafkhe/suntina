@@ -20,6 +20,8 @@ import { responseMeDto } from './dtos/response-me.dto';
 import { Serialize } from 'src/interceptors/serialize.interceptor';
 import { editProfileDto } from './dtos/edit-profile.dto';
 import { responseEditProfile } from './dtos/edit-profile.dto';
+import { craeteAdminDto } from './dtos/createAdmin.dto';
+import { AuthMasterGuard } from './gaurds/auth-master.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -64,5 +66,15 @@ export class AuthController {
   me(@Me() me: User) {
     console.log('me is called');
     return me;
+  }
+
+  @ApiHeader({ name: 'auth-admin', description: 'token' })
+  @UseGuards(AuthMasterGuard)
+  @Post('/createAdmin')
+  @ApiResponse({
+    status: 201,
+  })
+  async createAdmin(@Body() body: craeteAdminDto) {
+    return this.authService.createAdmin(body);
   }
 }

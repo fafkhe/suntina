@@ -9,6 +9,7 @@ import { validateEmail } from './utils/validateEmail';
 import { JwtService } from '@nestjs/jwt';
 import { Cache } from 'cache-manager';
 import { editProfileDto } from './dtos/edit-profile.dto';
+import { craeteAdminDto } from './dtos/createAdmin.dto';
 
 @Injectable()
 export class AuthService {
@@ -16,7 +17,7 @@ export class AuthService {
     @InjectRepository(User) private userRepo: Repository<User>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private jwtService: JwtService,
-  ) {}
+  ) { }
 
   #generateNumericString(length: number): string {
     const res = Array.from({ length }).reduce((acc) => {
@@ -90,14 +91,13 @@ export class AuthService {
 
   async findById(id: number) {
     const thisUser = await this.#readSingleUserFromCache(id);
-    console.log(thisUser,"thisUser")
+    console.log(thisUser, 'thisUser');
     if (!thisUser)
       throw new BadRequestException('there is no user with this ID!!');
     return thisUser;
-
   }
 
-  async editprofile(id:number,data:editProfileDto) {
+  async editprofile(id: number, data: editProfileDto) {
     const thisUser = await this.userRepo.findOne({
       where: {
         id: data.id,
@@ -106,6 +106,24 @@ export class AuthService {
 
     const newUser = await this.userRepo.save({ id, ...data });
 
-    return "ok";
+    return 'ok';
+  }
+
+  async createAdmin(data: craeteAdminDto) {
+    if (!data.email || !data.role) {
+      throw new BadRequestException('bad input');
+    }
+
+    const thisAdmin = this.userRepo.create({
+      email: data.email,
+      role: data.role,
+    });
+
+    await this.userRepo.save(thisAdmin);
+
+    return 'ok';
+
+
+
   }
 }
