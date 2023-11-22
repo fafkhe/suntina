@@ -74,8 +74,15 @@ export class AuthController {
   @ApiResponse({
     status: 201,
   })
-  async createAdmin(@Body() body: craeteAdminDto) {
+  createAdmin(@Body() body: craeteAdminDto) {
     return this.authService.createAdmin(body);
+  }
+
+  
+  @UseGuards(AuthMasterGuard)
+  @Get('/delete/:id')
+  deleteAdmin(@Param('id') id:number) {
+    return this.authService.deleteAdmin(id)
   }
 
   @Post('/admin/step_one')

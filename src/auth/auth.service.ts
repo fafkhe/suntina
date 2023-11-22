@@ -86,6 +86,7 @@ export class AuthService {
     });
     console.log('can you see me?????im here', token); //
 
+    this.cacheManager.del(`auth-${data.email}`);
 
     return { token };
   }
@@ -93,6 +94,7 @@ export class AuthService {
   async findById(id: number) {
     const thisUser = await this.#readSingleUserFromCache(id);
     console.log(thisUser, 'thisUser');
+
     if (!thisUser)
       throw new BadRequestException('there is no user with this ID!!');
     return thisUser;
@@ -105,7 +107,8 @@ export class AuthService {
       },
     });
 
-    const newUser = await this.userRepo.save({ id, ...data });4
+    const newUser = await this.userRepo.save({ id, ...data });
+
     this.cacheManager.del(`user-${String(id)}`);
 
     return 'ok';
@@ -120,6 +123,23 @@ export class AuthService {
       email: data.email,
       role: data.role,
     });
+
+    await this.userRepo.save(thisAdmin);
+
+    return 'ok';
+  }
+
+  async deleteAdmin(id: number) {
+    const thisAdmin = await this.userRepo.findOne({
+      where: {
+        id: id,
+      },
+    });
+    if (!thisAdmin) {
+      throw new BadRequestException('there is no admin with this id!!');
+    }
+
+    await this.userRepo.delete({ id });
 
     await this.userRepo.save(thisAdmin);
 
