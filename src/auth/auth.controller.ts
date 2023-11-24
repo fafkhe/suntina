@@ -10,19 +10,21 @@ import {
 import { AuthStepOneDto } from './dtos/auth.dto';
 import { AuthService } from './auth.service';
 import { AuthStepTwoDto } from './dtos/auth.dto';
-import { Me } from 'src/decorators/me.decoratos';
-import { User } from 'src/entities/user.entity';
-import { AuthGuard } from './gaurds/auth.guard';
+import { Me } from '../decorators/me.decoratos';
+import { User } from '../entities/user.entity';
+import { AuthGuard } from './gaurds/auth.gaurd';
 import { ApiResponse, ApiTags, ApiHeader } from '@nestjs/swagger';
 import { apiResponseStepOneDto } from './dtos/authResponse.dto';
 import { apiResponseSteptwoDto } from './dtos/authResponse.dto';
 import { responseMeDto } from './dtos/response-me.dto';
-import { Serialize } from 'src/interceptors/serialize.interceptor';
+import { Serialize } from '../interceptors/serialize.interceptor';
 import { editProfileDto } from './dtos/edit-profile.dto';
 import { responseEditProfile } from './dtos/edit-profile.dto';
 import { craeteAdminDto } from './dtos/createAdmin.dto';
-import { AuthMasterGuard } from './gaurds/auth-master.guard';
+import { AuthMasterGuard } from './gaurds/auth-master.gaurd';
 import { UserQueryDto } from './dtos/UsersQuery.dto';
+import { AuthAdminGuard } from './gaurds/auth-admin.gaurd';
+import { responseAllUsers } from './dtos/response.users.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -79,15 +81,17 @@ export class AuthController {
     return this.authService.createAdmin(body);
   }
 
+  @Serialize(responseAllUsers)
+  @UseGuards(AuthAdminGuard)
   @Get('/getAllUsers')
-  getAlLusers(@Query() query:UserQueryDto ) {
-    return this.authService.AllUsers(query)
+  getAlLusers(@Query() query: UserQueryDto) {
+    return this.authService.AllUsers(query);
   }
-  
+
   @UseGuards(AuthMasterGuard)
   @Get('/delete/:id')
-  deleteAdmin(@Param('id') id:number) {
-    return this.authService.deleteAdmin(id)
+  deleteAdmin(@Param('id') id: number) {
+    return this.authService.deleteAdmin(id);
   }
 
   @Post('/admin/step_one')

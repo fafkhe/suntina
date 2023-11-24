@@ -2,9 +2,9 @@ import { Injectable, Inject, BadRequestException } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from 'src/entities/user.entity';
+import { User } from '../entities/user.entity';
 import { AuthStepOneDto, AuthStepTwoDto } from './dtos/auth.dto';
-import { sendEmail } from 'src/mailer/mailer';
+import { sendEmail } from '../mailer/mailer';
 import { validateEmail } from './utils/validateEmail';
 import { JwtService } from '@nestjs/jwt';
 import { Cache } from 'cache-manager';
@@ -59,10 +59,14 @@ export class AuthService {
 
     const isEmailCorrect = validateEmail(data.email);
     if (!isEmailCorrect)
-      throw new BadRequestException('your email is incorrect !!!');
+      throw new BadRequestException('your email is incorrect!');
 
     sendEmail(data.email, code);
-    return 'we will send verification code to your email.';
+    // return 'we will send verification code to your email.';
+    return {
+      statusCode: 200,
+      msg: 'we will send verification code to your email.',
+    };
   }
 
   async authStepTwo(data: AuthStepTwoDto) {
@@ -108,7 +112,7 @@ export class AuthService {
       },
     });
 
-    const newUser = await this.userRepo.save({ id, ...data });
+     await this.userRepo.save({ id, ...data });
 
     this.cacheManager.del(`user-${String(id)}`);
 
@@ -122,9 +126,8 @@ export class AuthService {
     const name = data.name || '';
     return this.userRepo.manager.query(
       'SELECT * FROM public.user WHERE LOWER(public.user.name) LIKE $1 OFFSET $2 ROWS FETCH NEXT $3 ROWS ONLY',
-      [`%${name}%`, 1, 1],
+      [`%${name}%`, data.limit, data.page],
     );
-
   }
 
   async createAdmin(data: craeteAdminDto) {
