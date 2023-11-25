@@ -119,7 +119,6 @@ export class AuthService {
   }
 
   async AllUsers(data: UserQueryDto) {
-
     console.log(data.name);
     const name = data.name || '';
     return this.userRepo.manager.query(
@@ -132,6 +131,14 @@ export class AuthService {
     if (!data.email || !data.role) {
       throw new BadRequestException('bad input');
     }
+
+    const existingAdmin = await this.userRepo.findOne({
+      where: {
+        email: data.email,
+      },
+    });
+    if (existingAdmin)
+      throw new BadRequestException('this admin already existed!');
 
     const thisAdmin = this.userRepo.create({
       email: data.email,
