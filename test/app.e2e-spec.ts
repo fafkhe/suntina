@@ -3,11 +3,17 @@ import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from './../src/app.module';
 import { ValidationPipe } from '@nestjs/common';
+import exp from 'constants';
 
 const myMap = new Map();
 myMap.set('givenEmail', 'fatemeh.khorshidvand1@gmail.com');
+myMap.set('givenEmail-2', 'amir@gmail.com');
 myMap.set('givenCode', '1111');
 myMap.set('givenName', 'fatemeh');
+myMap.set(
+  't2',
+  'ut eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwicm9sZSI6InVzZXIiLCJpc01hc3RlciI6ZmFsc2UsImlhdCI6MTcwMDkxMDc1MH0.jxfyQEzOSQlHvByCNFIpJhHGihHEFLIRpHXRzZrnBf0',
+);
 
 describe('AppController (e2e)', () => {
   let app: INestApplication;
@@ -110,4 +116,155 @@ describe('Auth (e2e)', () => {
 
     expect(token).toBeDefined();
   });
+
+  //auth-admin-step-one
+
+  it("fails when the user does'nt provide correct phoneNumber", async () => {
+    expect.assertions(1);
+
+    const x = await request(app.getHttpServer())
+      .post('/auth/admin/step_one')
+      .send({
+        email: myMap.get('givenEmail') + 'asdfdffd',
+      });
+    expect(x.body.message).toBe('admin is not exist!!');
+  });
+
+  //auth-admin-step-two
+  it("fails if admin does'nt provide Code", async () => {
+    expect.assertions(1);
+
+    const x = await request(app.getHttpServer())
+      .post('/auth/admin/step_two')
+      .send({
+        name: myMap.get('givenName'),
+        email: myMap.get('givenEmail'),
+        code: null,
+      });
+
+    expect(x.body.message[0]).toBe('code must be a string');
+  });
+
+  it("fails if admin does'nt provide Code", async () => {
+    expect.assertions(1);
+
+    const x = await request(app.getHttpServer())
+      .post('/auth/admin/step_two')
+      .send({
+        name: myMap.get('givenName'),
+        email: myMap.get('givenEmail'),
+        code: null,
+      });
+
+    expect(x.body.message[0]).toBe('code must be a string');
+  });
+
+  //me
+
+  it('me', async () => {
+    expect.assertions(1);
+
+    const token = myMap.get('t1');
+
+    const { body } = await request(app.getHttpServer())
+      .get('/auth/me')
+      .set('auth', `ut ${token}`)
+      .send({});
+
+    expect(body.email).toBe(myMap.get('givenEmail'));
+  });
+
+  // editProfile
+  it("fails if user does'nt exist!", async () => {
+    expect.assertions(1);
+
+    const x = await request(app.getHttpServer()).post('/auth/edit').send({});
+
+    expect(x.statusCode).toBe(401);
+  });
+
+  it('return true if user provided correct data!', async () => {
+    const token = myMap.get('t1');
+    expect.assertions(1);
+
+    const x = await request(app.getHttpServer())
+      .post('/auth/edit')
+      .set('auth', `ut ${token}`)
+      .send({
+        name: myMap.get('givenName') + 'faf',
+      });
+
+    console.log(x, 'x.body is here');
+
+    expect(x.statusCode).toBe(201);
+  });
+
+  // create-Admin
+
+  it('fails if the admin is not master!', async () => {
+    const token = myMap.get('t1');
+    expect.assertions(1);
+
+    const x = await request(app.getHttpServer())
+      .post('/auth/createAdmin')
+      .set('auth', myMap.get('t2'))
+      .send({});
+
+    expect(x.statusCode).toBe(403);
+  });
+
+  it('If the user provides the correct information, it will be successful', async () => {
+    const token = myMap.get('t1');
+    expect.assertions(1);
+    const x = await request(app.getHttpServer())
+      .post('/auth/createAdmin')
+      .set('auth', `ut ${token}`)
+      .send({
+        email: myMap.get('givenEmail-2'),
+        role: 'admin',
+      });
+
+    expect(x.statusCode).toBe(201);
+  });
+
+  // delete-admin
+
+  it('fails if the admin is not master!', async () => {
+    const token = myMap.get('t2');
+    expect.assertions(1);
+
+    const x = await request(app.getHttpServer())
+      .get(`/auth/delete/:id`)
+      .set('auth', `ut ${token}`)
+      .send({});
+
+    expect(x.statusCode).toBe(403);
+  });
+
+  it('fails if admin does not exist!', async () => {
+    const token = myMap.get('t1');
+    expect.assertions(2);
+
+    const x = await request(app.getHttpServer())
+      .get(`/auth/delete/${14}`)
+      .set('auth', `ut ${token}`)
+      .send({});
+
+    expect(x.body.message).toBe('there is no admin with this id!!');
+    expect(x.statusCode).toBe(400);
+  });
+
+  it('fails if requester(admin) does not exist in db', async () => {
+    const token = myMap.get('t1');
+    expect.assertions(2);
+
+    const x = await request(app.getHttpServer())
+      .get(`/auth/delete/${14}`)
+      .set('auth', myMap.get('t2'))
+      .send({});
+    
+    expect(x.body.message).toBe("Forbidden resource")
+    expect(x.statusCode).toBe(403)
+
+  })
 });

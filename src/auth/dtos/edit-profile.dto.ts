@@ -7,8 +7,6 @@ export class editProfileDto {
   @IsString()
   name: string;
 
-  @IsNumber()
-  id:number
 }
 
 export class responseEditProfile{

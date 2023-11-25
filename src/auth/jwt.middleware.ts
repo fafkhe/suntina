@@ -30,8 +30,7 @@ export class jwtAuthMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction) {
     try {
       const auth = req.headers.auth;
-
-      console.log(auth,"autj is here")
+      
 
       if (!auth || typeof auth !== 'string') return next();
 

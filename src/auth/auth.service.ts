@@ -98,7 +98,6 @@ export class AuthService {
 
   async findById(id: number) {
     const thisUser = await this.#readSingleUserFromCache(id);
-    console.log(thisUser, 'thisUser');
 
     if (!thisUser)
       throw new BadRequestException('there is no user with this ID!!');
@@ -108,11 +107,11 @@ export class AuthService {
   async editprofile(id: number, data: editProfileDto) {
     const thisUser = await this.userRepo.findOne({
       where: {
-        id: data.id,
+        id: id,
       },
     });
 
-     await this.userRepo.save({ id, ...data });
+    await this.userRepo.save({ id, ...data });
 
     this.cacheManager.del(`user-${String(id)}`);
 
@@ -120,7 +119,6 @@ export class AuthService {
   }
 
   async AllUsers(data: UserQueryDto) {
-    // const theseUsers = await this.userRepo.find({});
 
     console.log(data.name);
     const name = data.name || '';
