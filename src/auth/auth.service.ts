@@ -128,27 +128,28 @@ export class AuthService {
   }
 
   async createAdmin(data: craeteAdminDto) {
-    if (!data.email || !data.role) {
-      throw new BadRequestException('bad input');
-    }
+    try {
+      if (!data.email || !data.role) {
+        throw new BadRequestException('bad input');
+      }
 
-    const existingAdmin = await this.userRepo.findOne({
-      where: {
+      const thisAdmin = this.userRepo.create({
         email: data.email,
-      },
-    });
-    if (existingAdmin)
-      throw new BadRequestException('this admin already existed!');
+        role: data.role,
+      });
 
-    const thisAdmin = this.userRepo.create({
-      email: data.email,
-      role: data.role,
-    });
+      await this.userRepo.save(thisAdmin);
 
-    await this.userRepo.save(thisAdmin);
-
-    return 'ok';
+      return 'ok';
+    } catch (error) {
+      console.log(error.message);
+      if (
+        error.message ==
+        'duplicate key value violates unique constraint "UQ_e12875dfb3b1d92d7d7c5377e22"'
+      ) throw new BadRequestException('this admin already existed');
+    }
   }
+  detail: 'Key (email)=(jixerm4n@gmail.com) already exists.';
 
   async deleteAdmin(id: number) {
     const thisAdmin = await this.userRepo.findOne({

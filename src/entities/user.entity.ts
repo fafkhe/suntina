@@ -3,7 +3,6 @@ import {
   Column,
   PrimaryGeneratedColumn,
   Index,
-  PrimaryColumn,
 } from 'typeorm';
 
 export enum UserRole {
@@ -22,7 +21,7 @@ export class User {
   })
   name: string;
 
-  @PrimaryColumn({ name: 'email' })
+  @Column({ unique: true })
   public email: string;
 
   @Column({
