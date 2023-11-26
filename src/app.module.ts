@@ -9,6 +9,12 @@ import { config } from 'dotenv';
 import { User } from './entities/user.entity';
 import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-store';
+import { MovieController } from './movie/movie.controller';
+import { MovieService } from './movie/movie.service';
+import { MovieModule } from './movie/movie.module';
+import { Movie } from './entities/movie.entity';
+import { AuthController } from './auth/auth.controller';
+import { AuthService } from './auth/auth.service';
 
 
 config();
@@ -26,7 +32,7 @@ config();
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      entities: [User],
+      entities: [User,Movie],
       synchronize: true,
     }),
     CacheModule.register({
@@ -46,6 +52,7 @@ config();
       secret: process.env.JWT_SECRET,
     }),
     AuthModule,
+    MovieModule,
   ],
   controllers: [AppController],
   providers: [AppService],
