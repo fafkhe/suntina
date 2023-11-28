@@ -119,7 +119,6 @@ export class AuthService {
   }
 
   async AllUsers(data: UserQueryDto) {
-    console.log(data.name);
     const name = data.name || '';
     return this.userRepo.manager.query(
       'SELECT * FROM public.user WHERE LOWER(public.user.name) LIKE $1 OFFSET $2 ROWS FETCH NEXT $3 ROWS ONLY',

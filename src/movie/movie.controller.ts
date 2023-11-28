@@ -10,15 +10,21 @@ import {
 import { MovieService } from './movie.service';
 import { createMovieDto } from './dtos/movie.dto';
 import { AuthAdminGuard } from 'src/auth/gaurds/auth-admin.gaurd';
-
+import { MovieQueryDto } from './dtos/movieQuery';
+import { get } from 'http';
 
 @Controller('movie')
 export class MovieController {
-  constructor(private movieService: MovieService) { }
-  
+  constructor(private movieService: MovieService) {}
+
   @UseGuards(AuthAdminGuard)
   @Post('create')
-  createMovie(@Body() body:createMovieDto ) {
-    return this.movieService.createMovie(body)
+  createMovie(@Body() body: createMovieDto) {
+    return this.movieService.createMovie(body);
+  }
+
+  @Get('getAll')
+  getAllMovies(@Query() query: MovieQueryDto) {
+    return this.movieService.AllMovies(query);
   }
 }
