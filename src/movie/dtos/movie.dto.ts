@@ -7,3 +7,14 @@ export class createMovieDto {
   @IsString()
   description: string;
 }
+
+export class editMovieDto {
+  @IsString()
+  id: string;
+  
+  @IsString()
+  name: string;
+
+  @IsString()
+  description: string;
+}

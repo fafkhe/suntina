@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Movie } from 'src/entities/movie.entity';
 import { Repository } from 'typeorm';
-import { createMovieDto } from './dtos/movie.dto';
+import { createMovieDto, editMovieDto } from './dtos/movie.dto';
 import { MovieQueryDto } from './dtos/movieQuery';
+import { data } from 'jquery';
 
 @Injectable()
 export class MovieService {
@@ -28,13 +29,27 @@ export class MovieService {
     );
   }
 
-  async singleMovie(id:string) {
+  async singleMovie(id: string) {
     const thisMovie = await this.MovieRepo.findOne({
       where: {
-        id: id
-      }
-    })
+        id: id,
+      },
+    });
 
     return thisMovie;
+  }
+
+  async editMovie(data: editMovieDto) {
+    if (!data.id) throw new BadRequestException('no such movie found!');
+
+    const thisMovie = await this.MovieRepo.findOne({
+      where: {
+        id: data.id,
+      },
+    });
+
+    await this.MovieRepo.save({ thisMovie, ...data });
+
+    return 'ok';
   }
 }

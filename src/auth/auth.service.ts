@@ -111,6 +111,8 @@ export class AuthService {
       },
     });
 
+    if (!thisUser.id) throw new BadRequestException("no such movie found")
+
     await this.userRepo.save({ id, ...data });
 
     this.cacheManager.del(`user-${String(id)}`);
