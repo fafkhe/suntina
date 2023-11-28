@@ -27,4 +27,14 @@ export class MovieService {
       [`%${name}%`, data.limit, data.page],
     );
   }
+
+  async singleMovie(id:string) {
+    const thisMovie = await this.MovieRepo.findOne({
+      where: {
+        id: id
+      }
+    })
+
+    return thisMovie;
+  }
 }

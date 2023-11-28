@@ -12,6 +12,7 @@ import { createMovieDto } from './dtos/movie.dto';
 import { AuthAdminGuard } from 'src/auth/gaurds/auth-admin.gaurd';
 import { MovieQueryDto } from './dtos/movieQuery';
 import { get } from 'http';
+import { param } from 'jquery';
 
 @Controller('movie')
 export class MovieController {
@@ -26,5 +27,10 @@ export class MovieController {
   @Get('getAll')
   getAllMovies(@Query() query: MovieQueryDto) {
     return this.movieService.AllMovies(query);
+  }
+
+  @Get('single/:id')
+  getSingleMovie(@Param('id') id: string) {
+    return this.movieService.singleMovie(id)
   }
 }
