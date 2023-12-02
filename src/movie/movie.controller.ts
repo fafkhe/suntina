@@ -9,13 +9,9 @@ import {
 } from '@nestjs/common';
 import { MovieService } from './movie.service';
 import { createMovieDto, editMovieDto } from './dtos/movie.dto';
-import { AuthAdminGuard } from 'src/auth/gaurds/auth-admin.gaurd';
+import { AuthAdminGuard } from '../auth/gaurds/auth-admin.gaurd';
 import { MovieQueryDto } from './dtos/movieQuery';
-import { get } from 'http';
-import { param, post } from 'jquery';
-import { Me } from 'src/decorators/me.decoratos';
-import { User } from 'src/entities/user.entity';
-import { AuthGuard } from 'src/auth/gaurds/auth.gaurd';
+
 
 @Controller('movie')
 export class MovieController {

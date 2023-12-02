@@ -13,12 +13,10 @@ import { MovieController } from './movie/movie.controller';
 import { MovieService } from './movie/movie.service';
 import { MovieModule } from './movie/movie.module';
 import { Movie } from './entities/movie.entity';
-import { AuthController } from './auth/auth.controller';
-import { AuthService } from './auth/auth.service';
-
+import { SaloonModule } from './saloon/saloon.module';
+import { Saloon } from './entities/saloon.entity';
 
 config();
-
 
 @Module({
   imports: [
@@ -31,8 +29,11 @@ config();
       port: +process.env.DB_PORT,
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
-      entities: [User,Movie],
+      database:
+        process.env.ENV === 'TEST'
+          ? process.env.DB_Name_Test
+          : process.env.DB_NAME,
+      entities: [User, Movie,Saloon],
       synchronize: true,
     }),
     CacheModule.register({
@@ -53,6 +54,7 @@ config();
     }),
     AuthModule,
     MovieModule,
+    SaloonModule,
   ],
   controllers: [AppController],
   providers: [AppService],

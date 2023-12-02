@@ -3,17 +3,23 @@ import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from './../src/app.module';
 import { ValidationPipe } from '@nestjs/common';
-import exp from 'constants';
 
 const myMap = new Map();
 myMap.set('givenEmail', 'fatemeh.khorshidvand1@gmail.com');
-myMap.set('givenEmail-2', 'amir@gmail.com');
+myMap.set('givenEmail-2', 'ali@gmail.com');
 myMap.set('givenCode', '1111');
 myMap.set('givenName', 'fatemeh');
 myMap.set(
   't2',
   'ut eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwicm9sZSI6InVzZXIiLCJpc01hc3RlciI6ZmFsc2UsImlhdCI6MTcwMDkxMDc1MH0.jxfyQEzOSQlHvByCNFIpJhHGihHEFLIRpHXRzZrnBf0',
 );
+
+function generateNumericString(length: number) {
+  const res = Array.from({ length }).reduce((acc) => {
+    return acc + String(Math.floor(Math.random() * 9));
+  }, '');
+  return String(res);
+}
 
 describe('AppController (e2e)', () => {
   let app: INestApplication;
@@ -213,18 +219,28 @@ describe('Auth (e2e)', () => {
     expect(x.statusCode).toBe(403);
   });
 
-  it('If the user provides the correct information, it will be successful', async () => {
+  it('If the master provides the correct information, it will be successful', async () => {
     const token = myMap.get('t1');
-    expect.assertions(1);
+    expect.assertions(2);
+    const email = `test-${Date.now()}${generateNumericString(4)}@test.com`;
     const x = await request(app.getHttpServer())
       .post('/auth/createAdmin')
       .set('auth', `ut ${token}`)
       .send({
-        email: myMap.get('givenEmail-2'),
+        email,
         role: 'admin',
       });
 
     expect(x.statusCode).toBe(201);
+
+    const y = await request(app.getHttpServer())
+      .post('/auth/createAdmin')
+      .set('auth', `ut ${token}`)
+      .send({
+        email,
+        role: 'admin',
+      });
+    expect(y.statusCode).toBe(400);
   });
 
   // delete-admin
@@ -262,9 +278,58 @@ describe('Auth (e2e)', () => {
       .get(`/auth/delete/${14}`)
       .set('auth', myMap.get('t2'))
       .send({});
-    
-    expect(x.body.message).toBe("Forbidden resource")
-    expect(x.statusCode).toBe(403)
 
-  })
+    expect(x.body.message).toBe('Forbidden resource');
+    expect(x.statusCode).toBe(403);
+  });
+});
+
+describe('Movie (e2e)', () => {
+  let app: INestApplication;
+
+  beforeEach(async () => {
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+
+    app = moduleFixture.createNestApplication();
+    app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+
+    await app.init();
+  });
+
+  //create-Movie
+  it('fails if the user wants to create movie', async () => {
+    expect.assertions(1);
+
+    const x = await request(app.getHttpServer()).post(`/movie/create`).send({
+      name: 'mr nobody',
+      description: 'this a huge film for who wants to see!',
+    });
+
+    console.log(x);
+    expect(x.statusCode).toBe(403);
+  });
+
+  //createMovie
+  it('if the addmin provide the information it will be successful!', async () => {
+    expect.assertions(1);
+
+    const x = await request(app.getHttpServer())
+      .post(`/movie/create`)
+      .set('auth', myMap.get('t1'))
+      .send({
+        name: 'mr nobody',
+        description: 'this a huge film for who wants to see!',
+      });
+
+    console.log(x);
+    expect(x.statusCode).toBe(201);
+  });
+
+  //editMovie
+
+  // it('fail if the movie does not exist!', () => {
+
+  // })
 });

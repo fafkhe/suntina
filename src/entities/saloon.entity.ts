@@ -1,8 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
-
 @Entity()
-export class Movie {
+export class Saloon {
   @PrimaryGeneratedColumn()
   id: string;
 
@@ -10,6 +9,8 @@ export class Movie {
   name: string;
 
   @Column()
-  description: string;
+  numOfSeat: number;
 
+  @Column()
+  numOfseatPerRow: number;
 }
