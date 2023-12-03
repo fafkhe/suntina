@@ -40,7 +40,7 @@ export class SaloonService {
     });
     if (!thisSaloon) throw new BadRequestException('no such saloon found!');
 
-    await this.saloonRepo.save({ thisSaloon, ...data });
+    this.saloonRepo.save({ thisSaloon, ...data });
 
     return 'ok';
   }

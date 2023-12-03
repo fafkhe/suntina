@@ -13,7 +13,7 @@ import {
 import { SaloonQueryDto } from './dtos/saloonQuery.dto';
 import { EditSaloonDto } from './dtos/saloon.dto';
 
-@Controller('saloon')
+@Controller('saloon') 
 export class SaloonController {
   constructor(private saloonService: SaloonService) {}
 

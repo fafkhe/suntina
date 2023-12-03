@@ -15,6 +15,9 @@ import { MovieModule } from './movie/movie.module';
 import { Movie } from './entities/movie.entity';
 import { SaloonModule } from './saloon/saloon.module';
 import { Saloon } from './entities/saloon.entity';
+import { SansController } from './sans/sans.controller';
+import { SansModule } from './sans/sans.module';
+import { Sans } from './entities/sans.entity';
 
 config();
 
@@ -33,7 +36,7 @@ config();
         process.env.ENV === 'TEST'
           ? process.env.DB_Name_Test
           : process.env.DB_NAME,
-      entities: [User, Movie,Saloon],
+      entities: [User, Movie,Saloon,Sans],
       synchronize: true,
     }),
     CacheModule.register({
@@ -55,6 +58,7 @@ config();
     AuthModule,
     MovieModule,
     SaloonModule,
+    SansModule,
   ],
   controllers: [AppController],
   providers: [AppService],
