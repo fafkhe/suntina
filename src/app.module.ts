@@ -10,7 +10,6 @@ import { User } from './entities/user.entity';
 import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-store';
 import { MovieController } from './movie/movie.controller';
-import { MovieService } from './movie/movie.service';
 import { MovieModule } from './movie/movie.module';
 import { Movie } from './entities/movie.entity';
 import { SaloonModule } from './saloon/saloon.module';
@@ -18,6 +17,8 @@ import { Saloon } from './entities/saloon.entity';
 import { SansController } from './sans/sans.controller';
 import { SansModule } from './sans/sans.module';
 import { Sans } from './entities/sans.entity';
+import { TicketController } from './ticket/ticket.controller';
+import { TicketModule } from './ticket/ticket.module';
 
 config();
 
@@ -36,7 +37,7 @@ config();
         process.env.ENV === 'TEST'
           ? process.env.DB_Name_Test
           : process.env.DB_NAME,
-      entities: [User, Movie,Saloon,Sans],
+      entities: [User, Movie, Saloon, Sans],
       synchronize: true,
     }),
     CacheModule.register({
@@ -59,8 +60,9 @@ config();
     MovieModule,
     SaloonModule,
     SansModule,
+    TicketModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, TicketController],
   providers: [AppService],
 })
 export class AppModule {}
