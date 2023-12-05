@@ -53,7 +53,7 @@ export class SaloonService {
     );
   }
 
-  async getSaloonById(id: string) {
+  async getSaloonById(id: number) {
     const thisSaloon = await this.saloonRepo.findOne({
       where: {
         id: id,

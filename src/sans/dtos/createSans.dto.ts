@@ -5,7 +5,7 @@ export class createSansDto {
   movieId: string;
 
   @IsString()
-  saloonId: string;
+  saloonid: number;
 
   @IsString()
   start: string;

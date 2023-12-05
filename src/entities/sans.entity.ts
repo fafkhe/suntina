@@ -9,11 +9,11 @@ export class Sans {
   movieId: string;
 
   @Column()
-  saloonId: string;
+  saloonid: number;
 
-  @Column()
-  start: string;
+  @Column({ type: 'timestamptz' })
+  start: Date;
 
-  @Column()
-  end: string;
+  @Column({ type: 'timestamptz' })
+  end: Date;
 }

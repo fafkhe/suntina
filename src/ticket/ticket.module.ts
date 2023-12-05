@@ -1,7 +1,19 @@
 import { Module } from '@nestjs/common';
 import { TicketService } from './ticket.service';
+import { Ticket } from 'src/entities/ticket.entity';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { TicketController } from './ticket.controller';
+import { MiddlewareConsumer } from '@nestjs/common';
+import { jwtAuthMiddleware } from 'src/auth/jwt.middleware';
+
 
 @Module({
-  providers: [TicketService]
+  imports: [TypeOrmModule.forFeature([Ticket])],
+  controllers: [TicketController],
+  providers: [TicketService],
 })
-export class TicketModule {}
+export class TicketModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(jwtAuthMiddleware).forRoutes('*');
+  }
+}

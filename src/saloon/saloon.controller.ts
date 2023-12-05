@@ -30,7 +30,7 @@ export class SaloonController {
   }
 
   @Get('Single/:id')
-  getSingleSaloon(@Param('id') id: string) {
+  getSingleSaloon(@Param('id') id: number) {
     return this.saloonService.getSaloonById(id);
   }
 

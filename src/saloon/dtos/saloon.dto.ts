@@ -13,7 +13,7 @@ export class createSaloonDto {
 
 export class EditSaloonDto {
   @IsNumber()
-  id: string;
+  id: number;
 
   @IsString()
   name: string;

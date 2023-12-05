@@ -12,10 +12,10 @@ export class Ticket {
   userName: string;
 
   @Column()
-  sansId: string;
+  sansId: number;
 
   @Column()
-  Seatnumber: string;
+  Seatnumber: number;
 
   @Column()
   isTaken: boolean;
