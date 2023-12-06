@@ -6,17 +6,17 @@ export class Ticket {
   id: string;
 
   @Column()
-  userId: string;
+  user_id: string;
 
   @Column()
-  userName: string;
+  user_name: string;
 
   @Column()
-  sansId: number;
+  sans_id: number;
 
   @Column()
-  Seatnumber: number;
+  seatnumber: number;
 
   @Column()
-  isTaken: boolean;
+  is_taken: boolean;
 }

@@ -28,7 +28,7 @@ export class MovieService {
     );
   }
 
-  async singleMovie(id: string) {
+  async singleMovie(id: number) {
     const thisMovie = await this.MovieRepo.findOne({
       where: {
         id: id,

@@ -29,7 +29,7 @@ export class MovieController {
   }
 
   @Get('single/:id')
-  getSingleMovie(@Param('id') id: string) {
+  getSingleMovie(@Param('id') id: number) {
     return this.movieService.singleMovie(id);
   }
 

@@ -16,7 +16,6 @@ import { SaloonModule } from './saloon/saloon.module';
 import { Saloon } from './entities/saloon.entity';
 import { SansController } from './sans/sans.controller';
 import { SansModule } from './sans/sans.module';
-import { Sans } from './entities/sans.entity';
 import { TicketController } from './ticket/ticket.controller';
 import { TicketModule } from './ticket/ticket.module';
 import { Ticket } from './entities/ticket.entity';
@@ -38,7 +37,7 @@ config();
         process.env.ENV === 'TEST'
           ? process.env.DB_Name_Test
           : process.env.DB_NAME,
-      entities: [User, Movie, Saloon, Sans, Ticket],
+      entities: [User, Movie, Saloon, Ticket],
       synchronize: true,
     }),
     CacheModule.register({

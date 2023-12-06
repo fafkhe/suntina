@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { SansService } from './sans.service';
 import { SansController } from './sans.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Sans } from 'src/entities/sans.entity';
 import { MiddlewareConsumer } from '@nestjs/common';
 import { jwtAuthMiddleware } from 'src/auth/jwt.middleware';
 import { Saloon } from 'src/entities/saloon.entity';
@@ -12,7 +11,7 @@ import { User } from 'src/entities/user.entity';
 import { Movie } from 'src/entities/movie.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Sans,User,Saloon,Ticket,Movie])],
+  imports: [TypeOrmModule.forFeature([User,Saloon,Ticket,Movie])],
   controllers: [SansController],
   providers: [SansService, AuthService],
 })

@@ -2,14 +2,14 @@ import { IsString } from 'class-validator';
 
 export class createSansDto {
   @IsString()
-  movieId: string;
+  movie_id: number;
 
   @IsString()
-  saloonid: number;
+  saloon_id: number;
 
   @IsString()
-  start: string;
+  start_t: string;
 
   @IsString()
-  end: string;
+  end_t: string;
 }

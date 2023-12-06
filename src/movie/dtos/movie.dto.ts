@@ -10,7 +10,7 @@ export class createMovieDto {
 
 export class editMovieDto {
   @IsString()
-  id: string;
+  id: number;
   
   @IsString()
   name: string;
