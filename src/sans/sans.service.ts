@@ -7,6 +7,7 @@ import { Saloon } from 'src/entities/saloon.entity';
 import { Movie } from 'src/entities/movie.entity';
 import { DataSource } from 'typeorm';
 import { SansQueryDto } from './dtos/sansQuery.dto';
+import e from 'express';
 
 @Injectable()
 export class SansService {
@@ -92,10 +93,41 @@ export class SansService {
     }
   }
 
-  async getSans(data: SansQueryDto) {
-    return this.dataSource.manager.query(
-      `SELECT * FROM public.sans WHERE public.sans.start_t > Now() ORDER BY public.sans.start_t OFFSET $1 ROWS FETCH NEXT $2 ROWS ONLY`,
-      [data.limit, data.page],
+  async getAllSanses(data: SansQueryDto) {
+  
+      const page = data.page || 0;
+      const limit = data.limit || 10;
+      const name = data.name || '';
+    
+
+      const sanses = await this.dataSource.manager.query(
+        `SELECT s.id as id, s.movie_id as movie_id, s.saloon_id as saloon_id,
+        m.name as name
+        FROM public.sans s
+        JOIN public.movie m
+        ON s.movie_id = m.id
+        WHERE (s.movie_id in (SELECT id FROM public.movie WHERE name LIKE $3)) AND (s.start_t > Now())
+        ORDER BY s.start_t OFFSET $1 ROWS FETCH NEXT $2 ROWS ONLY`,
+        [page * limit, limit, `%${name}%`],
+      );
+   
+    return sanses;
+  }
+
+  async getSans(id: number) {
+    const sans = await this.dataSource.manager.query(
+      `SELECT s.id as id, s.movie_id as movie_id, s.saloon_id as saloon_id,
+        m.name as name
+        FROM SANS s
+        JOIN MOVIE m
+        ON s.movie_id = m.id
+        WHERE s.id = $1 `,
+      [id],
     );
+
+    if (sans == 0)
+      throw new BadRequestException('there is no sans with this id');
+
+    return sans;
   }
 }

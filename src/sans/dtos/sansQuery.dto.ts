@@ -8,6 +8,8 @@ export class SansQueryDto {
   page: number;
 
 
+  @IsOptional()
+  name: string;
 
   @IsOptional()
   limit: number;
