@@ -99,7 +99,7 @@ export class SansService {
     const name = data.name || '';
 
     const sanses = await this.dataSource.manager.query(
-      `SELECT s.id as id, s.movie_id as movie_id, s.saloon_id as saloon_id,
+      `SELECT s.id as id, s.movie_id as movie_id, s.saloon_id as saloon_id, s.start_t as start_t, s.end_t as end_t,
         m.name as name
         FROM public.sans s
         JOIN public.movie m
@@ -116,7 +116,7 @@ export class SansService {
 
   async getSans(id: number) {
     const sans = await this.dataSource.manager.query(
-      `SELECT s.id as id, s.movie_id as movie_id, s.saloon_id as saloon_id,
+      `SELECT s.id as id, s.movie_id as movie_id, s.saloon_id as saloon_id, s.start_t as start_t, s.end_t as end_t,
         m.name as name
         FROM SANS s
         JOIN MOVIE m
@@ -124,6 +124,9 @@ export class SansService {
         WHERE s.id = $1 `,
       [id],
     );
+
+    if (sans[0].start_t > Date.now())
+      throw new BadRequestException('this sans has deprecated!');
 
     if (sans == 0)
       throw new BadRequestException('there is no sans with this id');
