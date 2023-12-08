@@ -19,6 +19,7 @@ import { SansModule } from './sans/sans.module';
 import { TicketController } from './ticket/ticket.controller';
 import { TicketModule } from './ticket/ticket.module';
 import { Ticket } from './entities/ticket.entity';
+import { Sans } from './entities/sans.entity';
 
 config();
 
@@ -37,7 +38,7 @@ config();
         process.env.ENV === 'TEST'
           ? process.env.DB_Name_Test
           : process.env.DB_NAME,
-      entities: [User, Movie, Saloon, Ticket],
+      entities: [User, Movie, Saloon, Ticket,Sans],
       synchronize: true,
     }),
     CacheModule.register({

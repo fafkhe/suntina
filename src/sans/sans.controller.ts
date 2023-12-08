@@ -10,6 +10,7 @@ import {
   Body,
   UseGuards,
 } from '@nestjs/common';
+import { SansQueryDto } from './dtos/sansQuery.dto';
 
 @Controller('sans')
 export class SansController {
@@ -19,5 +20,10 @@ export class SansController {
   @Post('create')
   createSans(@Body() body: createSansDto) {
     return this.sansService.createSans(body);
+  }
+
+  @Get('get-all')
+  getAllSans(@Query() query: SansQueryDto) {
+    return this.sansService.getSans(query)
   }
 }

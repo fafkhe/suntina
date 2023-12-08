@@ -9,9 +9,10 @@ import { Ticket } from 'src/entities/ticket.entity';
 import { AuthService } from 'src/auth/auth.service';
 import { User } from 'src/entities/user.entity';
 import { Movie } from 'src/entities/movie.entity';
+import { Sans } from 'src/entities/sans.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User,Saloon,Ticket,Movie])],
+  imports: [TypeOrmModule.forFeature([User,Saloon,Ticket,Movie,Sans])],
   controllers: [SansController],
   providers: [SansService, AuthService],
 })

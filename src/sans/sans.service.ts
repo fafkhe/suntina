@@ -6,6 +6,7 @@ import { Ticket } from 'src/entities/ticket.entity';
 import { Saloon } from 'src/entities/saloon.entity';
 import { Movie } from 'src/entities/movie.entity';
 import { DataSource } from 'typeorm';
+import { SansQueryDto } from './dtos/sansQuery.dto';
 
 @Injectable()
 export class SansService {
@@ -14,22 +15,9 @@ export class SansService {
     @InjectRepository(Ticket) private TicketRepo: Repository<Ticket>,
     @InjectRepository(Movie) private MovieRepo: Repository<Movie>,
     private dataSource: DataSource,
-  ) {
-    console.log('8888');
-    console.log(DataSource);
-    dataSource.manager.query(`
-    create table if not exists sans ( 
-      id SERIAL PRIMARY KEY, 
-      saloon_id integer,
-      movie_id integer, 
-      start_t TIMESTAMPTZ, 
-      end_t TIMESTAMPTZ
-    );`);
-  }
+  ) {}
 
   async createSans(data: createSansDto) {
-    console.log(DataSource, '/////././');
-
     const thisSaloon = await this.saloonRepo.findOne({
       where: {
         id: data.saloon_id,
@@ -44,8 +32,23 @@ export class SansService {
 
     if (!thisSaloon || !thisMovie)
       throw new BadRequestException('please sure that data is correct!!');
+
+    const checkTime = new Date(data.start_t);
+    checkTime.setHours(0, 0, 0, 0);
+
+    if (checkTime.getTime() < Date.now())
+      throw new BadRequestException('bad request');
+
+    if (data.start_t >= data.end_t)
+      throw new BadRequestException('please sure that data is correct!!');
+
     const existingSans = await this.dataSource.manager.query(
-      'SELECT * FROM public.sans WHERE (public.sans.saloon_id = $3) AND ((public.sans.start_t <= $1 AND public.sans.end_t >= $1) OR (public.sans.start_t <= $2 AND public.sans.end_t >= $2))',
+      `SELECT * FROM public.sans WHERE (public.sans.saloon_id = $3)
+       AND ((public.sans.end_t BETWEEN $1 AND $2) 
+        OR (public.sans.start_t BETWEEN $1 AND $2)
+        OR ($1 >= public.sans.start_t AND $2 <= public.sans.end_t)
+        OR ($1 <= public.sans.start_t AND $2 >= public.sans.end_t))`,
+
       [data.start_t, data.end_t, data.saloon_id],
     );
 
@@ -59,31 +62,40 @@ export class SansService {
     await queryRunner.startTransaction();
 
     try {
+      console.log('avale try');
       const [{ nextval }] = await this.dataSource.manager.query(
         `SELECT nextval('public.sans_id_seq');`,
       );
-      console.log(nextval, 'xxxxx');
-      console.log('avale try');
+      console.log(nextval);
+
       await queryRunner.manager.query(
-        `INSERT INTO sans (id,saloon_id, movie_id, start_t, end_t)
+        `INSERT INTO public.sans (id,saloon_id, movie_id, start_t, end_t)
             values ($5 ,$1, $2, $3, $4);`,
         [data.saloon_id, data.movie_id, data.start_t, data.end_t, nextval],
       );
 
       for (let i = 1; i <= thisSaloon.numOfSeat; i++) {
         await this.dataSource.manager.query(
-          `INSERT INTO ticket (user_id, user_name, sans_id, seatnumber, is_taken) values ($1, $2, $3, $4, $5);`,
+          `INSERT INTO public.ticket (user_id, user_name, sans_id, seatnumber, is_taken) values ($1, $2, $3, $4, $5);`,
           ['', '', nextval, i, false],
         );
       }
 
       await queryRunner.commitTransaction();
     } catch (e) {
+      console.log(e, 'eror');
       await queryRunner.rollbackTransaction();
       throw e;
     } finally {
       await queryRunner.release();
       return { msg: 'sans created' };
     }
+  }
+
+  async getSans(data: SansQueryDto) {
+    return this.dataSource.manager.query(
+      `SELECT * FROM public.sans WHERE public.sans.start_t > Now() ORDER BY public.sans.start_t OFFSET $1 ROWS FETCH NEXT $2 ROWS ONLY`,
+      [data.limit, data.page],
+    );
   }
 }
