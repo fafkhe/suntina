@@ -46,10 +46,12 @@ export class SaloonService {
   }
 
   async AllSaloons(data: SaloonQueryDto) {
+    const limit = data.limit || 10;
+    const page = data.page || 0;
     const name = data.name || '';
     return this.saloonRepo.manager.query(
       'SELECT * FROM public.saloon WHERE LOWER(public.saloon.name) LIKE $1 OFFSET $2 ROWS FETCH NEXT $3 ROWS ONLY',
-      [`%${name}%`, data.limit, data.page],
+      [`%${name}%`, page * limit, limit],
     );
   }
 

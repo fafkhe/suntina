@@ -94,23 +94,23 @@ export class SansService {
   }
 
   async getAllSanses(data: SansQueryDto) {
-  
-      const page = data.page || 0;
-      const limit = data.limit || 10;
-      const name = data.name || '';
-    
+    const page = data.page || 0;
+    const limit = data.limit || 10;
+    const name = data.name || '';
 
-      const sanses = await this.dataSource.manager.query(
-        `SELECT s.id as id, s.movie_id as movie_id, s.saloon_id as saloon_id,
+    const sanses = await this.dataSource.manager.query(
+      `SELECT s.id as id, s.movie_id as movie_id, s.saloon_id as saloon_id,
         m.name as name
         FROM public.sans s
         JOIN public.movie m
         ON s.movie_id = m.id
         WHERE (s.movie_id in (SELECT id FROM public.movie WHERE name LIKE $3)) AND (s.start_t > Now())
         ORDER BY s.start_t OFFSET $1 ROWS FETCH NEXT $2 ROWS ONLY`,
-        [page * limit, limit, `%${name}%`],
-      );
-   
+      [page * limit, limit, `%${name}%`],
+    );
+
+    if (sanses == 0) throw new BadRequestException('bad request');
+
     return sanses;
   }
 
