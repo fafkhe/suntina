@@ -11,6 +11,8 @@ import { Cache } from 'cache-manager';
 import { editProfileDto } from './dtos/edit-profile.dto';
 import { craeteAdminDto } from './dtos/createAdmin.dto';
 import { UserQueryDto } from './dtos/UsersQuery.dto';
+import { accountDto } from './dtos/account.dto';
+import { DataSource } from 'typeorm';
 
 @Injectable()
 export class AuthService {
@@ -18,7 +20,13 @@ export class AuthService {
     @InjectRepository(User) private userRepo: Repository<User>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private jwtService: JwtService,
-  ) {}
+    private dataSource: DataSource,
+  ) {
+    this.dataSource.manager.query(`
+      ALTER TABLE public.user DROP CONSTRAINT IF EXISTS balance_check;
+      ALTER TABLE public.user ADD CONSTRAINT balance_check CHECK (balance>=0);
+    `);
+  }
 
   #generateNumericString(length: number): string {
     const res = Array.from({ length }).reduce((acc) => {
@@ -89,7 +97,6 @@ export class AuthService {
       role: thisUser.role,
       isMaster: thisUser.isMaster,
     });
-    console.log('can you see me?????im here', token); //
 
     this.cacheManager.del(`auth-${data.email}`);
 
@@ -111,7 +118,7 @@ export class AuthService {
       },
     });
 
-    if (!thisUser.id) throw new BadRequestException("no such movie found")
+    if (!thisUser.id) throw new BadRequestException('no such movie found');
 
     await this.userRepo.save({ id, ...data });
 
@@ -147,7 +154,8 @@ export class AuthService {
       if (
         error.message ==
         'duplicate key value violates unique constraint "UQ_e12875dfb3b1d92d7d7c5377e22"'
-      ) throw new BadRequestException('this admin already existed');
+      )
+        throw new BadRequestException('this admin already existed');
     }
   }
   detail: 'Key (email)=(jixerm4n@gmail.com) already exists.';
@@ -215,5 +223,16 @@ export class AuthService {
     return {
       token,
     };
+  }
+
+  async addToaccount(me: User, data: accountDto) {
+    await this.dataSource.manager.query(
+      `UPDATE public.user
+       SET balance = balance + $1 
+       WHERE id = $2`,
+      [data.balance, me.id],
+    );
+
+    return 'ok';
   }
 }

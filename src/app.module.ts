@@ -63,7 +63,7 @@ config();
     SansModule,
     TicketModule,
   ],
-  controllers: [AppController, TicketController],
+  controllers: [AppController,],
   providers: [AppService],
 })
 export class AppModule {}

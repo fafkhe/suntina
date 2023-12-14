@@ -24,11 +24,16 @@ export class SansController {
 
   @Get('get-all')
   getAllSans(@Query() query: SansQueryDto) {
-    return this.sansService.getAllSanses(query)
+    return this.sansService.getAllSanses(query);
   }
 
   @Get('/:id')
-  getSingleSans(@Param('id') id:number ) {
-    return this.sansService.getSans(id)
+  getSingleSans(@Param('id') id: number) {
+    return this.sansService.getSans(id);
+  }
+
+  @Get('/sansByMovie/:id')
+  getSansByMovie(@Param('id') id: number,@Query() query: SansQueryDto) {
+    return this.sansService.SansesByMovie(id, query);
   }
 }

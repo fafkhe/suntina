@@ -7,7 +7,7 @@ import { Saloon } from 'src/entities/saloon.entity';
 import { Movie } from 'src/entities/movie.entity';
 import { DataSource } from 'typeorm';
 import { SansQueryDto } from './dtos/sansQuery.dto';
-import e from 'express';
+import { Sans } from 'src/entities/sans.entity';
 
 @Injectable()
 export class SansService {
@@ -15,8 +15,14 @@ export class SansService {
     @InjectRepository(Saloon) private saloonRepo: Repository<Saloon>,
     @InjectRepository(Ticket) private TicketRepo: Repository<Ticket>,
     @InjectRepository(Movie) private MovieRepo: Repository<Movie>,
+    @InjectRepository(Sans) private sansRepo: Repository<Sans>,
     private dataSource: DataSource,
-  ) {}
+  ) {
+    this.dataSource.manager.query(`
+      ALTER TABLE public.sans DROP CONSTRAINT IF EXISTS date_check;
+      ALTER TABLE public.sans ADD CONSTRAINT date_check CHECK (end_t > start_t AND start_t > Now());
+    `);
+  }
 
   async createSans(data: createSansDto) {
     const thisSaloon = await this.saloonRepo.findOne({
@@ -32,15 +38,6 @@ export class SansService {
     });
 
     if (!thisSaloon || !thisMovie)
-      throw new BadRequestException('please sure that data is correct!!');
-
-    const checkTime = new Date(data.start_t);
-    checkTime.setHours(0, 0, 0, 0);
-
-    if (checkTime.getTime() < Date.now())
-      throw new BadRequestException('bad request');
-
-    if (data.start_t >= data.end_t)
       throw new BadRequestException('please sure that data is correct!!');
 
     const existingSans = await this.dataSource.manager.query(
@@ -63,33 +60,38 @@ export class SansService {
     await queryRunner.startTransaction();
 
     try {
-      console.log('avale try');
       const [{ nextval }] = await this.dataSource.manager.query(
         `SELECT nextval('public.sans_id_seq');`,
       );
-      console.log(nextval);
 
-      await queryRunner.manager.query(
+      const result = await queryRunner.manager.query(
         `INSERT INTO public.sans (id,saloon_id, movie_id, start_t, end_t)
             values ($5 ,$1, $2, $3, $4);`,
         [data.saloon_id, data.movie_id, data.start_t, data.end_t, nextval],
       );
 
+      console.log(result);
+
       for (let i = 1; i <= thisSaloon.numOfSeat; i++) {
         await this.dataSource.manager.query(
-          `INSERT INTO public.ticket (user_id, user_name, sans_id, seatnumber, is_taken) values ($1, $2, $3, $4, $5);`,
-          ['', '', nextval, i, false],
+          `INSERT INTO public.ticket (user_id, user_name, sans_id, seatnumber, is_taken, price) values ($1, $2, $3, $4, $5, $6);`,
+          ['', '', nextval, i, false, 50],
         );
       }
 
       await queryRunner.commitTransaction();
-    } catch (e) {
-      console.log(e, 'eror');
-      await queryRunner.rollbackTransaction();
-      throw e;
-    } finally {
       await queryRunner.release();
       return { msg: 'sans created' };
+    } catch (e) {
+      console.log(e, 'eror');
+
+      if (e.message.includes('date_check'))
+        throw new BadRequestException('fix your date and try again later');
+
+      await queryRunner.rollbackTransaction();
+      await queryRunner.release();
+
+      throw e;
     }
   }
 
@@ -109,8 +111,6 @@ export class SansService {
       [page * limit, limit, `%${name}%`],
     );
 
-    if (sanses == 0) throw new BadRequestException('bad request');
-
     return sanses;
   }
 
@@ -125,12 +125,47 @@ export class SansService {
       [id],
     );
 
-    if (sans[0].start_t > Date.now())
+    if (new Date(sans[0].start_t).getTime() > Date.now())
       throw new BadRequestException('this sans has deprecated!');
 
     if (sans == 0)
       throw new BadRequestException('there is no sans with this id');
 
     return sans;
+  }
+
+  async SansesByMovie(id: number, query: SansQueryDto) {
+    const movie = await this.MovieRepo.findOne({
+      where: { id: id },
+    });
+
+    if (!movie)
+      throw new BadRequestException('there is no movie with this id!!');
+
+    const take = query.limit || 10;
+    const skip = query.page || 0;
+
+    const sanses = await this.sansRepo.find({
+      where: {
+        movie_id: id,
+      },
+    });
+
+    const [result, total] = await this.sansRepo.findAndCount({
+      where: { movie_id: id },
+      take: take,
+      skip: skip,
+    });
+
+    for (let i = 0; i < sanses.length; i++) {
+      if (new Date(sanses[i].start_t).getTime() > Date.now()) {
+        throw new BadRequestException('sans is deprecated');
+      }
+    }
+
+    return {
+      data: result,
+      count: total,
+    };
   }
 }

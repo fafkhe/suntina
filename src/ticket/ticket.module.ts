@@ -5,12 +5,15 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { TicketController } from './ticket.controller';
 import { MiddlewareConsumer } from '@nestjs/common';
 import { jwtAuthMiddleware } from 'src/auth/jwt.middleware';
+import { User } from 'src/entities/user.entity';
+import { AuthService } from 'src/auth/auth.service';
+import { Sans } from 'src/entities/sans.entity';
 
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Ticket])],
+  imports: [TypeOrmModule.forFeature([Ticket,User,Sans])],
   controllers: [TicketController],
-  providers: [TicketService],
+  providers: [TicketService,AuthService],
 })
 export class TicketModule {
   configure(consumer: MiddlewareConsumer) {

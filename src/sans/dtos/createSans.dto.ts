@@ -1,10 +1,10 @@
-import { IsString } from 'class-validator';
+import { IsNumber, IsString } from 'class-validator';
 
 export class createSansDto {
-  @IsString()
+  @IsNumber()
   movie_id: number;
 
-  @IsString()
+  @IsNumber()
   saloon_id: number;
 
   @IsString()

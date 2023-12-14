@@ -25,6 +25,7 @@ import { AuthMasterGuard } from './gaurds/auth-master.gaurd';
 import { UserQueryDto } from './dtos/UsersQuery.dto';
 import { AuthAdminGuard } from './gaurds/auth-admin.gaurd';
 import { responseAllUsers } from './dtos/response.users.dto';
+import { accountDto } from './dtos/account.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -111,4 +112,12 @@ export class AuthController {
   auth_admin_step_two(@Body() body: AuthStepTwoDto) {
     return this.authService.auth_admin_step_two(body);
   }
+
+
+  @UseGuards(AuthGuard)
+  @Post('/addToAccount')
+  addToAccount(@Me() me:User,@Body() body:accountDto) {
+    return this.authService.addToaccount(me,body)
+  }
+
 }

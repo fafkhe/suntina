@@ -1,9 +1,4 @@
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  Index,
-} from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, Index, Check } from 'typeorm';
 
 export enum UserRole {
   ADMIN = 'admin',
@@ -11,6 +6,7 @@ export enum UserRole {
 }
 
 @Entity()
+// @Check('"balance">=0')
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
@@ -22,7 +18,7 @@ export class User {
   name: string;
 
   @Column({ unique: true })
-  public email: string;
+  email: string;
 
   @Column({
     type: 'enum',
@@ -35,4 +31,7 @@ export class User {
     default: false,
   })
   isMaster: boolean;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  balance: number;
 }
