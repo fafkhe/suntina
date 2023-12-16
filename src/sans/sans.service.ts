@@ -44,7 +44,7 @@ export class SansService {
     });
 
     if (!thisSaloon || !thisMovie)
-      throw new BadRequestException('please sure that data is correct!!');
+      throw new BadRequestException('please make sure that data is correct!!');
 
     const existingSans = await this.dataSource.manager.query(
       `SELECT * FROM public.sans WHERE (public.sans.saloon_id = $3)
@@ -72,7 +72,7 @@ export class SansService {
 
       const result = await queryRunner.manager.query(
         `INSERT INTO public.sans (id,saloon_id, movie_id, start_t, end_t)
-            values ($5 ,$1, $2, $3, $4);`,
+            values ($5, $1, $2, $3, $4);`,
         [data.saloon_id, data.movie_id, data.start_t, data.end_t, nextval],
       );
 
@@ -81,7 +81,7 @@ export class SansService {
       for (let i = 1; i <= thisSaloon.numOfSeat; i++) {
         await this.dataSource.manager.query(
           `INSERT INTO public.ticket (user_id, user_name, sans_id, seatnumber, is_taken, price) values ($1, $2, $3, $4, $5, $6);`,
-          ['', '', nextval, i, false, 50],
+          [0, '', nextval, i, false, 50],
         );
       }
 

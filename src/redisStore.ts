@@ -40,8 +40,6 @@ export class RedisStore {
         const x = await fetch(url);
         const data = await x.json();
 
-        console.log(data,"/////data")
-
         if (data == 'not found') {
           throw new NotFoundException('not found');
         }
@@ -59,7 +57,7 @@ export class RedisStore {
       if (error.message == 'not found') {
         throw new NotFoundException('not found');
       }
-      console.log(error.message);
+      return new InternalServerErrorException("oops, this one's on us");
     }
   }
 }

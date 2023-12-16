@@ -6,7 +6,7 @@ export class Ticket {
   id: string;
 
   @Column()
-  user_id: string;
+  user_id: number;
 
   @Column()
   user_name: string;

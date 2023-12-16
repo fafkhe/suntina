@@ -15,12 +15,13 @@ export class AuthGuard implements CanActivate {
 
     const requester = request.requester;
 
+
     if (!requester || !requester.id)
       throw new UnauthorizedException('unatorized');
 
-    if (!requester || !requester.id) return false;
 
     const thisUser = await this.authService.findById(requester.id);
+
 
     if (!thisUser) return false;
     request.me = thisUser;

@@ -5,6 +5,7 @@ import { User } from 'src/entities/user.entity';
 import { reserveTicketDto } from './dtos/reserve-ticket.dto';
 import { Sans } from 'src/entities/sans.entity';
 import { Repository, DataSource } from 'typeorm';
+import { ticketQueryDto } from './dtos/ticketQuery.dto';
 
 @Injectable()
 export class TicketService {
@@ -27,7 +28,7 @@ export class TicketService {
       },
     });
 
-    if (!thisSans || new Date(thisSans.start_t).getTime() > Date.now()) {
+    if (!thisSans || new Date(thisSans.start_t).getTime() < Date.now()) {
       throw new BadRequestException('this sans is not exist');
     }
 
@@ -82,7 +83,25 @@ export class TicketService {
       await queryRunner.release();
 
       throw e;
-      // return e;
     }
+  }
+
+  async getMyTickets(me: User, query: ticketQueryDto) {
+    const take = query.limit || 10;
+    const page = query.page || 0;
+
+    let object = {
+      user_id: me.id,
+    };
+
+    if (query.sansId) object['sans_id'] = query.sansId;
+
+    const [tickets] = await this.ticketRepo.findAndCount({
+      where: object,
+      take: take,
+      skip: page * take,
+    });
+
+    return tickets;
   }
 }
