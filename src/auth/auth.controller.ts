@@ -68,7 +68,6 @@ export class AuthController {
   @Serialize(responseMeDto)
   @Get('/me')
   me(@Me() me: User) {
-    console.log('me is called');
     return me;
   }
 

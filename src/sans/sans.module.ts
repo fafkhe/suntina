@@ -10,11 +10,13 @@ import { AuthService } from 'src/auth/auth.service';
 import { User } from 'src/entities/user.entity';
 import { Movie } from 'src/entities/movie.entity';
 import { Sans } from 'src/entities/sans.entity';
+import { RedisStore } from '../redisStore';
+import { DataProcessLayer } from '../dpl';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User,Saloon,Ticket,Movie,Sans])],
+  imports: [TypeOrmModule.forFeature([User, Saloon, Ticket, Movie, Sans])],
   controllers: [SansController],
-  providers: [SansService, AuthService],
+  providers: [SansService, AuthService, RedisStore, DataProcessLayer],
 })
 export class SansModule {
   configure(consumer: MiddlewareConsumer) {

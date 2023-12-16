@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-  
   db:
     image: postgres:14.1-alpine
     restart: always
@@ -29,7 +28,13 @@ services:
       timeout: 5s
       retries: 5
       start_period: 5s
-      
+  # imdb-scraper:
+  #   build:
+  #     dockerfile: ./pkg/imdb-scraper/dockerfile
+  #     context: .
+  #   ports:
+  #     - 4000:4000
+
   # app:
   #   container_name: app
   #   build:
@@ -52,4 +57,3 @@ services:
   #       condition: service_healthy
   #     db:
   #       condition: service_healthy
-       

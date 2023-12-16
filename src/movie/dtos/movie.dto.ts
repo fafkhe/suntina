@@ -5,16 +5,16 @@ export class createMovieDto {
   name: string;
 
   @IsString()
-  description: string;
+  slug: string;
 }
 
 export class editMovieDto {
   @IsString()
   id: number;
-  
+
   @IsString()
   name: string;
 
   @IsString()
-  description: string;
+  slug: string;
 }

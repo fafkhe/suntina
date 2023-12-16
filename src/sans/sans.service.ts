@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { createSansDto } from './dtos/createSans.dto';
@@ -8,6 +12,7 @@ import { Movie } from 'src/entities/movie.entity';
 import { DataSource } from 'typeorm';
 import { SansQueryDto } from './dtos/sansQuery.dto';
 import { Sans } from 'src/entities/sans.entity';
+import { DataProcessLayer } from 'src/dpl';
 
 @Injectable()
 export class SansService {
@@ -17,6 +22,7 @@ export class SansService {
     @InjectRepository(Movie) private MovieRepo: Repository<Movie>,
     @InjectRepository(Sans) private sansRepo: Repository<Sans>,
     private dataSource: DataSource,
+    private DPL: DataProcessLayer,
   ) {
     this.dataSource.manager.query(`
       ALTER TABLE public.sans DROP CONSTRAINT IF EXISTS date_check;
@@ -101,8 +107,7 @@ export class SansService {
     const name = data.name || '';
 
     const sanses = await this.dataSource.manager.query(
-      `SELECT s.id as id, s.movie_id as movie_id, s.saloon_id as saloon_id, s.start_t as start_t, s.end_t as end_t,
-        m.name as name
+      `SELECT s.id as id, s.movie_id as movie_id, s.saloon_id as saloon_id, s.start_t as start_t, s.end_t as end_t, m.slug as movie_slug
         FROM public.sans s
         JOIN public.movie m
         ON s.movie_id = m.id
@@ -111,27 +116,26 @@ export class SansService {
       [page * limit, limit, `%${name}%`],
     );
 
-    return sanses;
+    console.log(sanses,"////")
+    return Promise.all(sanses.map((sans) => this.DPL.convertSans(sans)));
   }
 
   async getSans(id: number) {
-    const sans = await this.dataSource.manager.query(
-      `SELECT s.id as id, s.movie_id as movie_id, s.saloon_id as saloon_id, s.start_t as start_t, s.end_t as end_t,
-        m.name as name
+    const [thisSans] = await this.dataSource.manager.query(
+      `SELECT s.id as id, s.movie_id as movie_id, s.saloon_id as saloon_id, s.start_t as start_t, s.end_t as end_t, m.slug as movie_slug
         FROM SANS s
         JOIN MOVIE m
         ON s.movie_id = m.id
-        WHERE s.id = $1 `,
+        WHERE s.id = $1 AND s.start_t > Now()`,
       [id],
     );
 
-    if (new Date(sans[0].start_t).getTime() > Date.now())
+    if (!thisSans) throw new NotFoundException('not found');
+
+    if (new Date(thisSans.start_t).getTime() < Date.now())
       throw new BadRequestException('this sans has deprecated!');
 
-    if (sans == 0)
-      throw new BadRequestException('there is no sans with this id');
-
-    return sans;
+    return this.DPL.convertSans(thisSans);
   }
 
   async SansesByMovie(id: number, query: SansQueryDto) {
@@ -151,21 +155,22 @@ export class SansService {
       },
     });
 
-    const [result, total] = await this.sansRepo.findAndCount({
+    const [result] = await this.sansRepo.findAndCount({
       where: { movie_id: id },
       take: take,
       skip: skip,
     });
 
     for (let i = 0; i < sanses.length; i++) {
-      if (new Date(sanses[i].start_t).getTime() > Date.now()) {
+      if (new Date(sanses[i].start_t).getTime() < Date.now()) {
         throw new BadRequestException('sans is deprecated');
       }
     }
 
-    return {
-      data: result,
-      count: total,
-    };
+
+
+    
+    return Promise.all(result.map((sans) => this.DPL.convertSans(sans)));
+
   }
 }
