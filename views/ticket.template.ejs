@@ -1,0 +1,42 @@
+<!DOCTYPE html> 
+<html lang="en"> 
+  <head> 
+    <meta charset="UTF-8" /> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /> 
+    <title>Document</title> 
+  </head> 
+  <body> 
+    <style> 
+      #container {
+        /* background-color: red; */
+        display: flex;
+        flex-direction: row;
+        padding: 12px;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+  
+      }
+  
+      .ticket-box {
+        background-color: #ddd;
+        margin: 12px;
+        height: auto;
+        width: 45%;
+        padding: 12px;
+        box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+        border: 1px rgb(105, 105, 105) dashed;
+      }
+  
+    </style>
+    <div id="container"> 
+      
+      <% tickets.map(t => { %> 
+
+        <div class="ticket-box" >
+          <div> movie: <%= t.movie_name %> </div>
+        </div> 
+         
+      <% })%> 
+    </div> 
+  </body> 
+</html>

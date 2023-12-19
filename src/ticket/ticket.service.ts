@@ -6,19 +6,113 @@ import { reserveTicketDto } from './dtos/reserve-ticket.dto';
 import { Sans } from 'src/entities/sans.entity';
 import { Repository, DataSource } from 'typeorm';
 import { ticketQueryDto } from './dtos/ticketQuery.dto';
+import { renderFile } from 'ejs';
+import { join } from 'path';
+import { create } from 'html-pdf';
+import { CreateOptions } from 'html-pdf';
+import { mkdirSync, createWriteStream, existsSync, createReadStream } from 'fs';
+import { StreamableFile } from '@nestjs/common';
 
 @Injectable()
 export class TicketService {
   constructor(
     @InjectRepository(Ticket) private ticketRepo: Repository<Ticket>,
     @InjectRepository(Sans) private sansRepo: Repository<Sans>,
-    // @InjectRepository(User) private userRepo: Repository<User>,
     private dataSource: DataSource,
   ) {
     this.dataSource.manager.query(`
       ALTER TABLE public.ticket DROP CONSTRAINT IF EXISTS price_check;
       ALTER TABLE public.ticket ADD CONSTRAINT price_check CHECK (price>0);
     `);
+  }
+
+  #convertToTicketDTO(data) {
+    return {
+      id: data.id,
+      user_id: data.user_id,
+      user_name: data.user_name,
+      sans_id: data.sans_id,
+      seatnumber: data.seatnumber,
+      price: data.price,
+      sans: {
+        id: data.sans_id,
+        name: data.start_t,
+        email: data.end_t,
+      },
+      saloon: {
+        id: data.saloon_name,
+      },
+      user: {
+        user_name: data.user_name,
+      },
+
+      movie: {
+        movie_name: data.movie_name,
+      },
+    };
+  }
+
+  #preparePDF(path, tickets) {
+    return new Promise((res, rej) => {
+      const x = join(process.cwd(), '/views/ticket.template.ejs');
+      console.log(tickets);
+      renderFile(x, { tickets: tickets }, (err, html) => {
+
+        if (err) return rej(err)
+        const options = {
+          format: 'A4',
+          orientation: 'landscape',
+        } as CreateOptions;
+        const x = create(html, options);
+
+        x.toStream((error, stream) => {
+          if (error) return rej(error);
+
+          stream
+            .pipe(createWriteStream(path))
+            .on('finish', res)
+            .on('error', rej);
+        });
+      });
+    });
+  }
+
+  async pdf(query: ticketQueryDto, me: User) {
+    const tickets = await this.dataSource.manager.query(
+      `SELECT t.id as id, t.user_id as user_id, t.user_name as user_name,
+       t.sans_id as sans_id, t.seatnumber as seatnumber, t.price as price, s.start_t,
+       s.end_t, saloon.name as saloon_name, movie.name as movie_Name, u.name as user_name
+       FROM public.ticket t
+       JOIN public.sans s
+       ON t.sans_id = s.id
+       JOIN public.saloon saloon
+       ON s.saloon_id = saloon.id
+       JOIN public.movie movie
+       ON s.movie_id = movie.id
+       JOIN public.user u
+       ON t.user_id = u.id 
+       WHERE (t.sans_id = $1) AND (t.user_id = $2)`,
+      [query.sansId, 1],
+    );
+
+
+    const tempPath = join(process.cwd(), '/public/temp');
+
+    if (!existsSync(tempPath)) {
+      mkdirSync(tempPath);
+    }
+
+    const fileName = `${new Date().getTime()}${Math.floor(
+      Math.random() * 999,
+    )}.pdf`;
+
+    const path = join(tempPath, fileName);
+
+    await this.#preparePDF(path, tickets);
+
+    const file = createReadStream(path);
+
+    return new StreamableFile(file);
   }
 
   async reserveTicket(data: reserveTicketDto, me: User) {
@@ -90,18 +184,25 @@ export class TicketService {
     const take = query.limit || 10;
     const page = query.page || 0;
 
-    let object = {
-      user_id: me.id,
-    };
+    const tickets = await this.dataSource.manager.query(
+      `SELECT t.id as id, t.user_id as user_id, t.user_name as user_name,
+       t.sans_id as sans_id, t.seatnumber as seatnumber, t.price as price, s.start_t,
+       s.end_t, saloon.name as saloon_name, movie.name as movie_Name, u.name as user_name
+       FROM public.ticket t
+       JOIN public.sans s
+       ON t.sans_id = s.id
+       JOIN public.saloon saloon
+       ON s.saloon_id = saloon.id
+       JOIN public.movie movie
+       ON s.movie_id = movie.id
+       JOIN public.user u
+       ON t.user_id = u.id 
+       WHERE (t.sans_id = $1) AND (t.user_id = $2)`,
+      [query.sansId, me.id],
+    );
 
-    if (query.sansId) object['sans_id'] = query.sansId;
-
-    const [tickets] = await this.ticketRepo.findAndCount({
-      where: object,
-      take: take,
-      skip: page * take,
-    });
-
-    return tickets;
+    return tickets.map(this.#convertToTicketDTO);
   }
 }
+
+// WHERE (public.ticket.sans_id = $1)

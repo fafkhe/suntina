@@ -5,6 +5,7 @@ import { AuthGuard } from 'src/auth/gaurds/auth.gaurd';
 import { User } from 'src/entities/user.entity';
 import { Me } from '../decorators/me.decoratos';
 import { ticketQueryDto } from './dtos/ticketQuery.dto';
+import { Res } from '@nestjs/common';
 
 @Controller('ticket')
 export class TicketController {
@@ -15,10 +16,16 @@ export class TicketController {
   reserveTicket(@Body() body: reserveTicketDto, @Me() me: User) {
     return this.ticketService.reserveTicket(body, me);
   }
-  
+
   @UseGuards(AuthGuard)
   @Get('/my-tickets')
-  getMyTickets(@Me() me: User, @Query() query:ticketQueryDto ) {
-    return this.ticketService.getMyTickets(me,query);
+  getMyTickets(@Me() me: User, @Query() query: ticketQueryDto) {
+    return this.ticketService.getMyTickets(me, query);
+  }
+
+  // @UseGuards(AuthGuard)
+  @Get('/pdf')
+  pdfRunner(@Query() query: ticketQueryDto, @Me() me: User) {
+    return this.ticketService.pdf(query, null);
   }
 }
