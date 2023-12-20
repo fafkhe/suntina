@@ -6,6 +6,7 @@ import { User } from 'src/entities/user.entity';
 import { Me } from '../decorators/me.decoratos';
 import { ticketQueryDto } from './dtos/ticketQuery.dto';
 import { Res } from '@nestjs/common';
+import { Response } from 'express';
 
 @Controller('ticket')
 export class TicketController {
@@ -23,9 +24,9 @@ export class TicketController {
     return this.ticketService.getMyTickets(me, query);
   }
 
-  // @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard)
   @Get('/pdf')
   pdfRunner(@Query() query: ticketQueryDto, @Me() me: User) {
-    return this.ticketService.pdf(query, null);
+    return this.ticketService.pdf(query, me);
   }
 }

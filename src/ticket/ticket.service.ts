@@ -10,8 +10,9 @@ import { renderFile } from 'ejs';
 import { join } from 'path';
 import { create } from 'html-pdf';
 import { CreateOptions } from 'html-pdf';
-import { mkdirSync, createWriteStream, existsSync, createReadStream } from 'fs';
+import { mkdirSync, createWriteStream, existsSync, createReadStream,readFileSync } from 'fs';
 import { StreamableFile } from '@nestjs/common';
+import { Response } from 'express';
 
 @Injectable()
 export class TicketService {
@@ -57,8 +58,7 @@ export class TicketService {
       const x = join(process.cwd(), '/views/ticket.template.ejs');
       console.log(tickets);
       renderFile(x, { tickets: tickets }, (err, html) => {
-
-        if (err) return rej(err)
+        if (err) return rej(err);
         const options = {
           format: 'A4',
           orientation: 'landscape',
@@ -69,9 +69,14 @@ export class TicketService {
           if (error) return rej(error);
 
           stream
-            .pipe(createWriteStream(path))
-            .on('finish', res)
-            .on('error', rej);
+          .pipe(createWriteStream(path))
+          .on('finish', () => {
+            // ### TODO
+            // scheduele a task to remove this file  
+            // after 10 minutes
+            res(null)
+          })
+          .on('error', rej);
         });
       });
     });
@@ -92,9 +97,8 @@ export class TicketService {
        JOIN public.user u
        ON t.user_id = u.id 
        WHERE (t.sans_id = $1) AND (t.user_id = $2)`,
-      [query.sansId, 1],
+      [query.sansId, me.id],
     );
-
 
     const tempPath = join(process.cwd(), '/public/temp');
 
@@ -109,6 +113,7 @@ export class TicketService {
     const path = join(tempPath, fileName);
 
     await this.#preparePDF(path, tickets);
+
 
     const file = createReadStream(path);
 
