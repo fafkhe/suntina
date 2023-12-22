@@ -6,10 +6,16 @@ import {
 } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
+import { User } from './entities/user.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class RedisStore {
-  constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
+  constructor(
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    @InjectRepository(User) private userRepo: Repository<User>,
+  ) {}
 
   async cacheMovie(slug: string, data) {
     let target = `m-${String(slug)}`;
@@ -39,6 +45,7 @@ export class RedisStore {
         const url = `http://localhost:4000/m/${slug}`;
         const x = await fetch(url);
         const data = await x.json();
+        console.log(data, 'data');
 
         if (data == 'not found') {
           throw new NotFoundException('not found');
@@ -57,7 +64,29 @@ export class RedisStore {
       if (error.message == 'not found') {
         throw new NotFoundException('not found');
       }
+      console.log(error, 'error');
       return new InternalServerErrorException("oops, this one's on us");
+    }
+  }
+
+  async readSingleUserFromCache(id: number): Promise<User | null> {
+    try {
+      let target = `user-${String(id)}`;
+
+      let thisUser = (await this.cacheManager.get(target)) as User;
+
+      if (!thisUser) {
+        thisUser = await this.userRepo.findOne({
+          where: {
+            id,
+          },
+        });
+        if (thisUser) await this.cacheManager.set(target, thisUser, 600 * 1000);
+      }
+
+      return thisUser;
+    } catch (error) {
+      return null;
     }
   }
 }

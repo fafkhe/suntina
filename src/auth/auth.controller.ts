@@ -55,7 +55,7 @@ export class AuthController {
     status: 201,
     type: responseEditProfile,
   })
-  @Post('/edit')
+  @Post('/edit/:id')
   editProfile(@Me() me:User , @Body() body: editProfileDto) {
     return this.authService.editprofile(me.id, body);
   }

@@ -4,11 +4,12 @@ import { AuthService } from './auth.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
 import { jwtAuthMiddleware } from './jwt.middleware';
+import { RedisStore } from 'src/redisStore';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User])],
   controllers: [AuthController],
-  providers: [AuthService],
+  providers: [AuthService,RedisStore],
 })
 export class AuthModule {
   configure(consumer: MiddlewareConsumer) {

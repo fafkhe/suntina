@@ -6,12 +6,13 @@ import { jwtAuthMiddleware } from 'src/auth/jwt.middleware';
 import { Saloon } from 'src/entities/saloon.entity';
 import { AuthService } from 'src/auth/auth.service';
 import { User } from 'src/entities/user.entity';
+import { RedisStore } from 'src/redisStore';
 
 
 @Module({
   imports: [TypeOrmModule.forFeature([Saloon,User])],
   controllers: [SaloonController],
-  providers: [SaloonService,AuthService],
+  providers: [SaloonService,AuthService,RedisStore],
 })
 export class SaloonModule {
   configure(consumer: MiddlewareConsumer) {

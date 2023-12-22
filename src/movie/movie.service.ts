@@ -10,14 +10,13 @@ import { Movie } from '../entities/movie.entity';
 import { Repository } from 'typeorm';
 import { createMovieDto, editMovieDto } from './dtos/movie.dto';
 import { MovieQueryDto } from './dtos/movieQuery';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
+import { RedisStore } from 'src/redisStore';
 
 @Injectable()
 export class MovieService {
   constructor(
     @InjectRepository(Movie) private MovieRepo: Repository<Movie>,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+     private redisStore: RedisStore,
   ) {}
 
   async createMovie(data: createMovieDto) {
@@ -31,50 +30,7 @@ export class MovieService {
     return newMovie;
   }
 
-  async #readSingleMovieFromCache(slug: string) {
-    try {
-      let target = `m-${String(slug)}`;
-
-      let x = await this.cacheManager.get(target);
-
-      let thisMovie;
-
-      if (x) {
-        thisMovie = JSON.parse(x as string);
-      }
-
-      if (!thisMovie) {
-        const url = `http://localhost:4000/m/${slug}`;
-        const x = await fetch(url);
-        const data = await x.json();
-
-        console.log(data, 'data');
-
-        console.log(data == 'not found');
-
-        if (data == 'not found') {
-          throw new NotFoundException('not found');
-        }
-
-        await this.cacheManager.set(
-          target,
-          JSON.stringify(data),
-          1000 * 60 * 60 * 24,
-        );
-        thisMovie = data;
-        console.log(`reading the movie with slug ${slug} from imdb`);
-      } else {
-        console.log(`reading the movie with slug ${slug} from redis`);
-      }
-
-      return thisMovie;
-    } catch (error) {
-      if (error.message == 'not found') {
-        throw new NotFoundException('not found');
-      }
-      return new InternalServerErrorException("oops, this one's on us");
-    }
-  }
+ 
 
   async AllMovies(data: MovieQueryDto) {
     const name = data.name || '';
@@ -93,7 +49,7 @@ export class MovieService {
 
     if (!thisMovie) throw new NotFoundException('not found');
 
-    const data = await this.#readSingleMovieFromCache(thisMovie.slug);
+    const data = await this.redisStore.getSingleMovieFromCache(thisMovie.slug);
 
     return {
       ...thisMovie,

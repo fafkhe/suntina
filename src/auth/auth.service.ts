@@ -13,6 +13,7 @@ import { craeteAdminDto } from './dtos/createAdmin.dto';
 import { UserQueryDto } from './dtos/UsersQuery.dto';
 import { accountDto } from './dtos/account.dto';
 import { DataSource } from 'typeorm';
+import { RedisStore } from 'src/redisStore';
 
 @Injectable()
 export class AuthService {
@@ -21,6 +22,7 @@ export class AuthService {
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private jwtService: JwtService,
     private dataSource: DataSource,
+    private redisStore: RedisStore
   ) {
     this.dataSource.manager.query(`
       ALTER TABLE public.user DROP CONSTRAINT IF EXISTS balance_check;
@@ -40,26 +42,7 @@ export class AuthService {
     return this.jwtService.sign({ id, role, isMaster });
   }
 
-  async #readSingleUserFromCache(id: number): Promise<User | null> {
-    try {
-      let target = `user-${String(id)}`;
-
-      let thisUser = (await this.cacheManager.get(target)) as User;
-
-      if (!thisUser) {
-        thisUser = await this.userRepo.findOne({
-          where: {
-            id,
-          },
-        });
-        if (thisUser) await this.cacheManager.set(target, thisUser, 600 * 1000);
-      }
-
-      return thisUser;
-    } catch (error) {
-      return null;
-    }
-  }
+ 
 
   async authStepOne(data: AuthStepOneDto) {
     const code = this.#generateNumericString(4);
@@ -104,7 +87,7 @@ export class AuthService {
   }
 
   async findById(id: number) {
-    const thisUser = await this.#readSingleUserFromCache(id);
+    const thisUser = await this.redisStore.readSingleUserFromCache(id);
 
     if (!thisUser)
       throw new BadRequestException('there is no user with this ID!!');

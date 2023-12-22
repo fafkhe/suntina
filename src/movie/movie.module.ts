@@ -7,11 +7,12 @@ import { MiddlewareConsumer } from '@nestjs/common';
 import { jwtAuthMiddleware } from '../auth/jwt.middleware';
 import { User } from '../entities/user.entity';
 import { AuthService } from '../auth/auth.service';
+import { RedisStore } from 'src/redisStore';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Movie, User])],
   controllers: [MovieController],
-  providers: [MovieService ,AuthService],
+  providers: [MovieService, AuthService, RedisStore],
 })
 export class MovieModule {
   configure(consumer: MiddlewareConsumer) {
