@@ -16,13 +16,13 @@ export class AuthMasterGuard implements CanActivate {
 
     const requester = request.requester;
 
-    if (!requester || !requester.id) return false;
+    if (!requester || !requester.id ||requester.role !=="admin" || !requester.isMaster) return false;
 
     const thisUser = await this.authService.findById(requester.id);
 
     console.log(thisUser, 'thisuser');
-    if (!thisUser || !thisUser.isMaster || thisUser.role !== 'admin')
-      return false;
+    // if (!thisUser || !thisUser.isMaster || thisUser.role !== 'admin')
+      // return false;
 
     request.me = thisUser;
 

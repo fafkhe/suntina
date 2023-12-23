@@ -10,7 +10,7 @@ import { Movie } from '../entities/movie.entity';
 import { Repository } from 'typeorm';
 import { createMovieDto, editMovieDto } from './dtos/movie.dto';
 import { MovieQueryDto } from './dtos/movieQuery';
-import { RedisStore } from 'src/redisStore';
+import { RedisStore } from '../redisStore';
 
 @Injectable()
 export class MovieService {

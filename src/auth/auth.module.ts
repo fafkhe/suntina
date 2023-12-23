@@ -4,7 +4,7 @@ import { AuthService } from './auth.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
 import { jwtAuthMiddleware } from './jwt.middleware';
-import { RedisStore } from 'src/redisStore';
+import { RedisStore } from '../redisStore';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User])],

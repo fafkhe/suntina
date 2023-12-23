@@ -13,7 +13,7 @@ import { craeteAdminDto } from './dtos/createAdmin.dto';
 import { UserQueryDto } from './dtos/UsersQuery.dto';
 import { accountDto } from './dtos/account.dto';
 import { DataSource } from 'typeorm';
-import { RedisStore } from 'src/redisStore';
+import { RedisStore } from '../redisStore';
 
 @Injectable()
 export class AuthService {
@@ -22,7 +22,7 @@ export class AuthService {
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private jwtService: JwtService,
     private dataSource: DataSource,
-    private redisStore: RedisStore
+    private redisStore: RedisStore,
   ) {
     this.dataSource.manager.query(`
       ALTER TABLE public.user DROP CONSTRAINT IF EXISTS balance_check;
@@ -42,8 +42,6 @@ export class AuthService {
     return this.jwtService.sign({ id, role, isMaster });
   }
 
- 
-
   async authStepOne(data: AuthStepOneDto) {
     const code = this.#generateNumericString(4);
     await this.cacheManager.set(`auth-${data.email}`, code, 180 * 1000);
@@ -53,7 +51,6 @@ export class AuthService {
       throw new BadRequestException('your email is incorrect!');
 
     sendEmail(data.email, code);
-    // return 'we will send verification code to your email.';
     return {
       statusCode: 200,
       msg: 'we will send verification code to your email.',
@@ -63,7 +60,11 @@ export class AuthService {
   async authStepTwo(data: AuthStepTwoDto) {
     const theCode = await this.cacheManager.get(`auth-${data.email}`);
 
-    if (!theCode || theCode !== data.code)
+    if (!data.code) throw new BadRequestException('bad request');
+
+    console.log(theCode, '//');
+
+    if (theCode !== data.code)
       throw new BadRequestException('the provided code doesnt match');
 
     let thisUser = await this.userRepo.findOne({
@@ -101,7 +102,7 @@ export class AuthService {
       },
     });
 
-    if (!thisUser.id) throw new BadRequestException('no such movie found');
+    if (!thisUser.id) throw new BadRequestException('no such user found');
 
     await this.userRepo.save({ id, ...data });
 
@@ -163,7 +164,6 @@ export class AuthService {
   async auth_admin_step_one(data: AuthStepOneDto) {
     const code = this.#generateNumericString(4);
     await this.cacheManager.set(`auth-${data.email}`, code, 180 * 1000);
-    // console.log('code', code);
 
     const thisAdmin = await this.userRepo.findOne({
       where: {
@@ -186,7 +186,13 @@ export class AuthService {
   }
   async auth_admin_step_two(data: AuthStepTwoDto) {
     const theCode = await this.cacheManager.get(`auth-${data.email}`);
-    if (!theCode || theCode !== data.code)
+    if (!data.code)
+      throw new BadRequestException(
+        'please make sure that you are prepare code',
+      );
+
+    console.log(theCode, 'the code');
+    if (theCode !== data.code)
       throw new BadRequestException('the provided code doesnt match');
 
     let thisAdmin = await this.userRepo.findOne({

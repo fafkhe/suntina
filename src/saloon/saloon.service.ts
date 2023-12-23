@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { Saloon } from 'src/entities/saloon.entity';
+import { Saloon } from '../entities/saloon.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { createSaloonDto } from './dtos/saloon.dto';

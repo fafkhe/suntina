@@ -7,6 +7,7 @@ export class UserQueryDto {
   @IsOptional()
   page: number;
 
+  @IsOptional()
   @IsString()
   name: string;
 

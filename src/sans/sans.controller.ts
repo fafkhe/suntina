@@ -1,4 +1,4 @@
-import { AuthAdminGuard } from 'src/auth/gaurds/auth-admin.gaurd';
+import { AuthAdminGuard } from '../auth/gaurds/auth-admin.gaurd';
 import { createSansDto } from './dtos/createSans.dto';
 import { SansService } from './sans.service';
 import {

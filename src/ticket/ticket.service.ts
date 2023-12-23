@@ -1,9 +1,9 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Ticket } from 'src/entities/ticket.entity';
-import { User } from 'src/entities/user.entity';
+import { Ticket } from '../entities/ticket.entity';
+import { User } from '../entities/user.entity';
 import { reserveTicketDto } from './dtos/reserve-ticket.dto';
-import { Sans } from 'src/entities/sans.entity';
+import { Sans } from '../entities/sans.entity';
 import { Repository, DataSource } from 'typeorm';
 import { ticketQueryDto } from './dtos/ticketQuery.dto';
 import { renderFile } from 'ejs';

@@ -1,4 +1,4 @@
-import { IsString } from 'class-validator';
+import { IsNumber, IsOptional, IsString, isString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger/dist';
 
 export class AuthStepOneDto {
@@ -10,6 +10,7 @@ export class AuthStepOneDto {
 export class AuthStepTwoDto {
   @ApiProperty()
   @IsString()
+  @IsOptional()
   name: string;
 
   @ApiProperty()
@@ -18,5 +19,5 @@ export class AuthStepTwoDto {
 
   @ApiProperty()
   @IsString()
-  code: number;
+  code: string;
 }

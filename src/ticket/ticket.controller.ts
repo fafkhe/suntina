@@ -1,8 +1,8 @@
 import { Body, Controller, Post, UseGuards, Get, Query } from '@nestjs/common';
 import { TicketService } from './ticket.service';
 import { reserveTicketDto } from './dtos/reserve-ticket.dto';
-import { AuthGuard } from 'src/auth/gaurds/auth.gaurd';
-import { User } from 'src/entities/user.entity';
+import { AuthGuard } from '../auth/gaurds/auth.gaurd';
+import { User } from '../entities/user.entity';
 import { Me } from '../decorators/me.decoratos';
 import { ticketQueryDto } from './dtos/ticketQuery.dto';
 import { Res } from '@nestjs/common';

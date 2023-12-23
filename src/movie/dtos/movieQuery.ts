@@ -7,6 +7,8 @@ export class MovieQueryDto {
   @IsOptional()
   page: number;
 
+
+  @IsOptional()
   @IsString()
   name: string;
 

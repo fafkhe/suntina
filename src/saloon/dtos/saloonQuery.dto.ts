@@ -7,6 +7,7 @@ export class SaloonQueryDto {
   @IsOptional()
   page: number;
 
+  @IsOptional()
   @IsString()
   name: string;
 

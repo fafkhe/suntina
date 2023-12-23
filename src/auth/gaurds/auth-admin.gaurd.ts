@@ -10,14 +10,15 @@ export class AuthAdminGuard implements CanActivate {
 
     const requester = request.requester;
 
-    console.log(requester);
-    if (!requester || !requester.id) return false;
+    console.log(requester,"////////////////////////////r");
+    if (!requester || !requester.id || requester.role !== 'admin'|| !requester.isMaster ) return false;
 
     const thisUser = await this.authService.findById(requester.id);
 
+    console.log(thisUser,"thisuser is here")
+
     if (!thisUser) return false;
 
-    if (thisUser.role != 'admin') return false;
     request.me = thisUser;
 
     return true;

@@ -1,4 +1,4 @@
-import { AuthAdminGuard } from 'src/auth/gaurds/auth-admin.gaurd';
+import { AuthAdminGuard } from '../auth/gaurds/auth-admin.gaurd';
 import { createSaloonDto } from './dtos/saloon.dto';
 import { SaloonService } from './saloon.service';
 import {

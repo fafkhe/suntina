@@ -7,7 +7,7 @@ import { MiddlewareConsumer } from '@nestjs/common';
 import { jwtAuthMiddleware } from '../auth/jwt.middleware';
 import { User } from '../entities/user.entity';
 import { AuthService } from '../auth/auth.service';
-import { RedisStore } from 'src/redisStore';
+import { RedisStore } from '../redisStore';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Movie, User])],

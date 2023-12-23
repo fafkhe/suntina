@@ -2,11 +2,11 @@ import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SaloonController } from './saloon.controller';
 import { SaloonService } from './saloon.service';
-import { jwtAuthMiddleware } from 'src/auth/jwt.middleware';
-import { Saloon } from 'src/entities/saloon.entity';
-import { AuthService } from 'src/auth/auth.service';
-import { User } from 'src/entities/user.entity';
-import { RedisStore } from 'src/redisStore';
+import { jwtAuthMiddleware } from '../auth/jwt.middleware';
+import { Saloon } from '../entities/saloon.entity';
+import { AuthService } from '../auth/auth.service';
+import { User } from '../entities/user.entity';
+import { RedisStore } from '../redisStore';
 
 
 @Module({

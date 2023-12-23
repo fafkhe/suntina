@@ -6,13 +6,13 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { createSansDto } from './dtos/createSans.dto';
-import { Ticket } from 'src/entities/ticket.entity';
-import { Saloon } from 'src/entities/saloon.entity';
-import { Movie } from 'src/entities/movie.entity';
+import { Ticket } from '../entities/ticket.entity';
+import { Saloon } from '../entities/saloon.entity';
+import { Movie } from '../entities/movie.entity';
 import { DataSource } from 'typeorm';
 import { SansQueryDto } from './dtos/sansQuery.dto';
-import { Sans } from 'src/entities/sans.entity';
-import { DataProcessLayer } from 'src/dpl';
+import { Sans } from '../entities/sans.entity';
+import { DataProcessLayer } from '../dpl';
 
 @Injectable()
 export class SansService {
