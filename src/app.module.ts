@@ -38,7 +38,7 @@ config();
         process.env.ENV === 'TEST'
           ? process.env.DB_Name_Test
           : process.env.DB_NAME,
-      entities: [User, Movie, Saloon, Ticket,Sans],
+      entities: [User, Movie, Saloon, Ticket, Sans],
       synchronize: true,
     }),
     CacheModule.register({
@@ -64,6 +64,6 @@ config();
     TicketModule,
   ],
   controllers: [AppController],
-  providers: [AppService,],
+  providers: [AppService],
 })
 export class AppModule {}

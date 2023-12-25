@@ -16,21 +16,22 @@ import { RedisStore } from '../redisStore';
 export class MovieService {
   constructor(
     @InjectRepository(Movie) private MovieRepo: Repository<Movie>,
-     private redisStore: RedisStore,
+    private redisStore: RedisStore,
   ) {}
 
   async createMovie(data: createMovieDto) {
-    const newMovie = this.MovieRepo.create({
-      name: data.name,
-      slug: data.slug,
-    });
+    try {
+      const newMovie = this.MovieRepo.create({
+        name: data.name,
+        slug: data.slug,
+      });
 
-    await this.MovieRepo.save(newMovie);
-
-    return newMovie;
+      await this.MovieRepo.save(newMovie);
+      return newMovie;
+    } catch (error) {
+      console.log(error);
+    }
   }
-
- 
 
   async AllMovies(data: MovieQueryDto) {
     const name = data.name || '';

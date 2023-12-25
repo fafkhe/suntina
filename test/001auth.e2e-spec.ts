@@ -1,9 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AppModule } from './../src/app.module';
+import { AppModule } from '../src/app.module';
 import * as request from 'supertest';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import { config } from 'dotenv';
+import { ValidationPipe } from '@nestjs/common';
 
 config();
 
@@ -32,7 +33,7 @@ function generateNumericString(length: number) {
   return String(res);
 }
 
-let app: NestExpressApplication;
+export let app: NestExpressApplication;
 
 describe('AppController (e2e)', () => {
   it('sets up our app', async () => {
@@ -41,6 +42,7 @@ describe('AppController (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.useGlobalPipes(new ValidationPipe());
 
     await app.init();
     app.useStaticAssets(join(__dirname, '..', 'public'));
@@ -92,11 +94,8 @@ describe('Auth (e2e)', () => {
         email: GetContext('user-email'),
       });
 
-    console.log(x, 'x is here ');
-
-    console.log(x.body.message, '///');
     expect(x.body.statusCode).toBe(400);
-    expect(x.body.message).toBe('bad request');
+    expect(x.body.message[0]).toBe("code must be a string");
   });
 
   it('fails if user provide wrong code', async () => {
@@ -150,7 +149,6 @@ describe('Auth (e2e)', () => {
       .send({
         email: GetContext('admin-email'),
       });
-    console.log(x, '//////');
     expect(x.text).toBe('we will send the code to your gmail account!');
   });
 
@@ -177,7 +175,7 @@ describe('Auth (e2e)', () => {
         code: null,
       });
 
-    expect(x.body.message).toBe('please make sure that you are prepare code');
+    expect(x.body.message[0]).toBe('code must be a string');
   });
 
   it('return true if all data are correct', async () => {
@@ -282,7 +280,7 @@ describe('Auth (e2e)', () => {
   // delete-admin
 
   it('fails if the admin is not master!', async () => {
-    const token = GetContext('token');
+    const token = GetContext('admin-email');
     expect.assertions(1);
 
     const x = await request(app.getHttpServer())
@@ -302,9 +300,7 @@ describe('Auth (e2e)', () => {
       .set('auth', `ut ${token}`)
       .send({});
 
-    expect(x.body.message).toBe('there is no admin with this id!!');
-    expect(x.statusCode).toBe(400);
+    expect(x.body.message).toBe('Forbidden resource');
+    expect(x.statusCode).toBe(403);
   });
 });
-
-
