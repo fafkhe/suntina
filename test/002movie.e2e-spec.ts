@@ -3,7 +3,7 @@ import { config } from 'dotenv';
 import { GetContext } from './001auth.e2e-spec';
 import { app } from './001auth.e2e-spec';
 
-const randomNumber = Math.floor(Math.random() * 1000);
+const randomNumber = Math.floor(Math.random() * 10000000);
 const randomNumberQuery = Math.floor(Math.random() * 10);
 
 config();

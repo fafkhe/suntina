@@ -12,9 +12,6 @@ export class createSaloonDto {
 }
 
 export class EditSaloonDto {
-  @IsNumber()
-  id: number;
-
   @IsString()
   name: string;
 

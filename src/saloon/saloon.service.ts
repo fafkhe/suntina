@@ -29,18 +29,22 @@ export class SaloonService {
     });
     await this.saloonRepo.save(newSaloon);
 
-    return 'ok';
+    return newSaloon;
   }
 
-  async editSaloon(data: EditSaloonDto) {
+  async editSaloon(data: EditSaloonDto, id: number) {
     const thisSaloon = await this.saloonRepo.findOne({
       where: {
-        id: data.id,
+        id: id,
       },
     });
     if (!thisSaloon) throw new BadRequestException('no such saloon found!');
 
-    this.saloonRepo.save({ thisSaloon, ...data });
+    let saloonToUpdate = await this.saloonRepo.findOneBy({ id: thisSaloon.id });
+    saloonToUpdate.name = data.name;
+    saloonToUpdate.numOfSeat = data.numOfSeat;
+    saloonToUpdate.numOfseatPerRow = data.numOfseatPerRow;
+    await this.saloonRepo.save(saloonToUpdate);
 
     return 'ok';
   }
@@ -66,6 +70,6 @@ export class SaloonService {
       throw new BadRequestException('this saloon does not exist!');
     }
 
-    return thisSaloon;
+    return [thisSaloon];
   }
 }

@@ -13,7 +13,7 @@ import {
 import { SaloonQueryDto } from './dtos/saloonQuery.dto';
 import { EditSaloonDto } from './dtos/saloon.dto';
 
-@Controller('saloon') 
+@Controller('saloon')
 export class SaloonController {
   constructor(private saloonService: SaloonService) {}
 
@@ -34,8 +34,8 @@ export class SaloonController {
     return this.saloonService.getSaloonById(id);
   }
 
-  @Post('edit')
-  editSaloon(@Body() body: EditSaloonDto) {
-    return this.saloonService.editSaloon(body);
+  @Post('edit/:id')
+  editSaloon(@Body() body: EditSaloonDto, @Param('id') id: number) {
+    return this.saloonService.editSaloon(body, id);
   }
 }

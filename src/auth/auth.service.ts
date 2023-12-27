@@ -62,7 +62,6 @@ export class AuthService {
 
     if (!data.code) throw new BadRequestException('bad request');
 
-    console.log(theCode, '//');
 
     if (theCode !== data.code)
       throw new BadRequestException('the provided code doesnt match');
@@ -134,7 +133,6 @@ export class AuthService {
 
       return 'ok';
     } catch (error) {
-      console.log(error.message);
       if (
         error.message ==
         'duplicate key value violates unique constraint "UQ_e12875dfb3b1d92d7d7c5377e22"'
@@ -191,7 +189,6 @@ export class AuthService {
         'please make sure that you are prepare code',
       );
 
-    console.log(theCode, 'the code');
     if (theCode !== data.code)
       throw new BadRequestException('the provided code doesnt match');
 

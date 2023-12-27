@@ -20,9 +20,6 @@ export class AuthMasterGuard implements CanActivate {
 
     const thisUser = await this.authService.findById(requester.id);
 
-    console.log(thisUser, 'thisuser');
-    // if (!thisUser || !thisUser.isMaster || thisUser.role !== 'admin')
-      // return false;
 
     request.me = thisUser;
 

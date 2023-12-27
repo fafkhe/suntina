@@ -55,7 +55,6 @@ export class TicketService {
   #preparePDF(path, tickets) {
     return new Promise((res, rej) => {
       const x = join(process.cwd(), '/views/ticket.template.ejs');
-      console.log(tickets);
       renderFile(x, { tickets: tickets }, (err, html) => {
         if (err) return rej(err);
         const options = {
@@ -153,7 +152,6 @@ export class TicketService {
           [me.id, data.seatNumbers[i]],
         );
 
-        console.log(result, 'result');
 
         if (result[1] === 0) {
           throw new BadRequestException(`seat already taken`);
@@ -171,7 +169,6 @@ export class TicketService {
       await queryRunner.release();
       return 'ok';
     } catch (e) {
-      console.log(e.message);
       await queryRunner.rollbackTransaction();
       if (e.message.includes('balance_check')) {
         throw new BadRequestException(
@@ -205,7 +202,6 @@ export class TicketService {
       [query.sansId, me.id],
     );
 
-    console.log(tickets,"///")
 
     return tickets.map(this.#convertToTicketDTO);
   }

@@ -76,7 +76,6 @@ export class SansService {
         [data.saloon_id, data.movie_id, data.start_t, data.end_t, nextval],
       );
 
-      console.log(result);
 
       for (let i = 1; i <= thisSaloon.numOfSeat; i++) {
         await this.dataSource.manager.query(
@@ -116,7 +115,6 @@ export class SansService {
       [page * limit, limit, `%${name}%`],
     );
 
-    console.log(sanses,"////")
     return Promise.all(sanses.map((sans) => this.DPL.convertSans(sans)));
   }
 

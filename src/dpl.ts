@@ -9,7 +9,6 @@ export class DataProcessLayer {
     const data = await this.redisStore.getSingleMovieFromCache(
       thisSans.movie_slug,
       );
-      console.log("//////",data)
 
     return {
       id: thisSans.id,

@@ -45,7 +45,6 @@ export class RedisStore {
         const url = `http://localhost:4000/m/${slug}`;
         const x = await fetch(url);
         const data = await x.json();
-        console.log(data, 'data');
 
         if (data == 'not found') {
           throw new NotFoundException('not found');
@@ -64,7 +63,6 @@ export class RedisStore {
       if (error.message == 'not found') {
         throw new NotFoundException('not found');
       }
-      console.log(error, 'error');
       return new InternalServerErrorException("oops, this one's on us");
     }
   }
