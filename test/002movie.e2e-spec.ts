@@ -44,7 +44,7 @@ describe('movieContrller (e2e)', () => {
     expect(x.statusCode).toBe(403);
   });
 
-  it("fails if user doesn't provide name", async () => {
+  it("fails if admin doesn't provide name", async () => {
     expect.assertions(1);
 
     const token = GetContext('token1');
@@ -58,6 +58,23 @@ describe('movieContrller (e2e)', () => {
       });
 
     expect(x.body.message[0]).toBe('name must be a string');
+  });
+
+  //create movie successfuly
+
+  it('successful if admin give sufficient information ', async () => {
+    const token = GetContext('token1');
+
+    const x = await request(app.getHttpServer())
+      .post(`/movie/create`)
+      .set('auth', `ut ${token}`)
+      .send({
+        name: 'openheimer',
+        slug: 'tt15398776',
+        role: 'admin',
+      });
+
+    expect(x.statusCode).toBe(201);
   });
 
   //single-movie
@@ -96,7 +113,7 @@ describe('movieContrller (e2e)', () => {
     expect.assertions(1);
 
     const x = await request(app.getHttpServer())
-      .get(`/movie/getall?name=mr`)
+      .get(`/movie/getall?name=open`)
       .send({});
 
     expect(x.body.length).not.toBe(0);
