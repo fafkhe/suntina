@@ -29,6 +29,7 @@ export class SansController {
 
   @Get('/:id')
   getSingleSans(@Param('id') id: number) {
+    console.log(id,"id")
     return this.sansService.getSans(id);
   }
 

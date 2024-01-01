@@ -26,6 +26,10 @@ export function GetContext(key: string): any {
   return context.get(key);
 }
 
+export function printContext() {
+  console.log(context)
+}
+
 function generateNumericString(length: number) {
   const res = Array.from({ length }).reduce((acc) => {
     return acc + String(Math.floor(Math.random() * 9));
@@ -95,7 +99,7 @@ describe('Auth (e2e)', () => {
       });
 
     expect(x.body.statusCode).toBe(400);
-    expect(x.body.message[0]).toBe("code must be a string");
+    expect(x.body.message[0]).toBe('code must be a string');
   });
 
   it('fails if user provide wrong code', async () => {

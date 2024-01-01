@@ -26,7 +26,6 @@ export class SansService {
   ) {
     this.dataSource.manager.query(`
       ALTER TABLE public.sans DROP CONSTRAINT IF EXISTS date_check;
-      ALTER TABLE public.sans ADD CONSTRAINT date_check CHECK (end_t > start_t AND start_t > Now());
     `);
   }
 
@@ -56,6 +55,8 @@ export class SansService {
       [data.start_t, data.end_t, data.saloon_id],
     );
 
+    console.log(existingSans);
+
     if (existingSans.length !== 0)
       throw new BadRequestException(
         'this saloon is already occupied at the selected hour!! ',
@@ -72,10 +73,12 @@ export class SansService {
 
       const result = await queryRunner.manager.query(
         `INSERT INTO public.sans (id,saloon_id, movie_id, start_t, end_t)
-            values ($5, $1, $2, $3, $4);`,
+         values ($5, $1, $2, $3, $4)
+         RETURNING id, saloon_id, movie_id, start_t, end_t;`,
         [data.saloon_id, data.movie_id, data.start_t, data.end_t, nextval],
       );
 
+      console.log(result, 'result is here ');
 
       for (let i = 1; i <= thisSaloon.numOfSeat; i++) {
         await this.dataSource.manager.query(
@@ -86,7 +89,7 @@ export class SansService {
 
       await queryRunner.commitTransaction();
       await queryRunner.release();
-      return { msg: 'sans created' };
+      return result;
     } catch (e) {
       console.log(e, 'eror');
 
@@ -128,6 +131,11 @@ export class SansService {
       [id],
     );
 
+    console.log(thisSans, "salam man singlesansam")
+    
+    console.log(id,"//////////////////////////////////////////////////")
+
+
     if (!thisSans) throw new NotFoundException('not found');
 
     if (new Date(thisSans.start_t).getTime() < Date.now())
@@ -165,10 +173,6 @@ export class SansService {
       }
     }
 
-
-
-    
     return Promise.all(result.map((sans) => this.DPL.convertSans(sans)));
-
   }
 }

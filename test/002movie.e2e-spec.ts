@@ -1,7 +1,8 @@
 import * as request from 'supertest';
 import { config } from 'dotenv';
-import { GetContext } from './001auth.e2e-spec';
-import { app } from './001auth.e2e-spec';
+import { GetContext, SetContext, app, printContext } from './001auth.e2e-spec';
+
+
 
 const randomNumber = Math.floor(Math.random() * 10000000);
 const randomNumberQuery = Math.floor(Math.random() * 10);
@@ -10,6 +11,7 @@ config();
 
 describe('movieContrller (e2e)', () => {
   it('/ (GET)', () => {
+    printContext()
     return request(app.getHttpServer())
       .get('/')
       .expect(200)
@@ -37,11 +39,12 @@ describe('movieContrller (e2e)', () => {
       .set('auth', `ut ${token}`)
       .send({
         name: 'mr nobody',
-        description: 'this a huge film for who wants to see!',
+        description: 'this is a huge film for who wants to see!',
         slug: '1133432',
       });
 
     expect(x.statusCode).toBe(403);
+
   });
 
   it("fails if admin doesn't provide name", async () => {
@@ -75,6 +78,8 @@ describe('movieContrller (e2e)', () => {
       });
 
     expect(x.statusCode).toBe(201);
+
+    
   });
 
   //single-movie
@@ -100,7 +105,6 @@ describe('movieContrller (e2e)', () => {
   });
 
   it('getting movie based on page and limit', async () => {
-    expect.assertions(1);
 
     const x = await request(app.getHttpServer())
       .get(`/movie/getall?limit=${randomNumberQuery}&page=${randomNumberQuery}`)
