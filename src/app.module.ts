@@ -9,16 +9,13 @@ import { config } from 'dotenv';
 import { User } from './entities/user.entity';
 import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-store';
-import { MovieController } from './movie/movie.controller';
 import { MovieModule } from './movie/movie.module';
 import { Movie } from './entities/movie.entity';
 import { SaloonModule } from './saloon/saloon.module';
 import { Saloon } from './entities/saloon.entity';
-import { SansController } from './sans/sans.controller';
 import { SansModule } from './sans/sans.module';
-import { TicketController } from './ticket/ticket.controller';
 import { TicketModule } from './ticket/ticket.module';
-import { Ticket } from './entities/ticket.entity';
+import { Ticket } from './entities/ticket.entity'; 
 import { Sans } from './entities/sans.entity';
 
 config();

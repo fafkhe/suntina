@@ -14,6 +14,11 @@ import { UserQueryDto } from './dtos/UsersQuery.dto';
 import { accountDto } from './dtos/account.dto';
 import { DataSource } from 'typeorm';
 import { RedisStore } from '../redisStore';
+import {
+  resetPassword_stepOne_dto,
+  resetPassword_stepThree_dto,
+  resetPassword_stepTwo_dto,
+} from './dtos/password.dto';
 
 @Injectable()
 export class AuthService {
@@ -61,7 +66,6 @@ export class AuthService {
     const theCode = await this.cacheManager.get(`auth-${data.email}`);
 
     if (!data.code) throw new BadRequestException('bad request');
-
 
     if (theCode !== data.code)
       throw new BadRequestException('the provided code doesnt match');
@@ -220,5 +224,88 @@ export class AuthService {
     );
 
     return 'ok';
+  }
+
+  #generateCode(length: number): string {
+    const res = Array.from({ length }).reduce((acc) => {
+      return acc + String(Math.floor(Math.random() * 9));
+      return acc + '1';
+    }, '');
+    return String(res);
+  }
+
+  async resetPass1(data: resetPassword_stepOne_dto) {
+    //check if email exist in db.
+
+    const thisUser = await this.userRepo.findOne({
+      where: {
+        email: data.email,
+      },
+    });
+
+
+    //if email does not exist returning messsage "email does not exist please make sure your email is correct"
+
+    if (!thisUser)
+      throw new BadRequestException(
+        'email doese not exist please make sure your email is correct',
+      );
+
+    //if email exist generate code and set it in redis.
+    const code = this.#generateCode(4);
+    await this.cacheManager.set(`pchr-${data.email}`, code, 180 * 1000);
+
+    //send the code through email for user.
+
+    sendEmail(data.email, code);
+    return {
+      statusCode: 200,
+      msg: 'we will send a code to your email.',
+    };
+  }
+
+  async resetPass2(data: resetPassword_stepTwo_dto) {
+    const code = data.code;
+
+    const thisUser = await this.userRepo.findOne({
+      where: {
+        email: data.email,
+      },
+    });
+
+    if (!thisUser)
+      throw new BadRequestException(
+        'email doese not exist please make sure your email is correct',
+      );
+
+    const theCode = await this.cacheManager.get(`pchr-${data.email}`);
+    console.log(typeof theCode, 'thecode');
+    if (theCode !== code)
+      throw new BadRequestException('the code is wrong, please try again!');
+
+    await this.cacheManager.set(
+      `permission-${data.email}`,
+      theCode,
+      180 * 1000,
+    );
+
+    
+    return {
+      statusCode: 200,
+      msg: 'code is correct you can write your new password',
+    };
+  }
+  
+  async resetpass3(data:resetPassword_stepThree_dto) {
+
+    //get code, email, new pass from user
+    
+    const permission = await this.cacheManager.get(`permission-${data.email}`);
+  
+    if (!permission)
+      throw new BadRequestException('your time is over, please try again!');
+    
+
+    //save new pass in db.
   }
 }

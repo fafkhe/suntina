@@ -10,7 +10,7 @@ import { renderFile } from 'ejs';
 import { join } from 'path';
 import { create } from 'html-pdf';
 import { CreateOptions } from 'html-pdf';
-import { mkdirSync, createWriteStream, existsSync, createReadStream,readFileSync } from 'fs';
+import { mkdirSync, createWriteStream, existsSync, createReadStream } from 'fs';
 import { StreamableFile } from '@nestjs/common';
 
 @Injectable()
@@ -67,14 +67,14 @@ export class TicketService {
           if (error) return rej(error);
 
           stream
-          .pipe(createWriteStream(path))
-          .on('finish', () => {
-            // ### TODO
-            // scheduele a task to remove this file  
-            // after 10 minutes
-            res(null)
-          })
-          .on('error', rej);
+            .pipe(createWriteStream(path))
+            .on('finish', () => {
+              // ### TODO
+              // scheduele a task to remove this file
+              // after 10 minutes
+              res(null);
+            })
+            .on('error', rej);
         });
       });
     });
@@ -83,11 +83,11 @@ export class TicketService {
   async pdf(query: ticketQueryDto, me: User) {
     const tickets = await this.dataSource.manager.query(
       `SELECT t.id as id, t.user_id as user_id, t.user_name as user_name,
-       t.sans_id as sans_id, t.seatnumber as seatnumber, t.price as price, s.start_t,
-       s.end_t, saloon.name as saloon_name, movie.name as movie_Name, u.name as user_name
+       t.sans_id as sans_id, t.seatnumber as seatnumber, t.price as price, s.start_t as start,
+       s.end_t as end, saloon.name as saloon_name, movie.name as movie_Name, u.name as name
        FROM public.ticket t
        JOIN public.sans s
-       ON t.sans_id = s.id
+       ON t.sans_id = s.id  
        JOIN public.saloon saloon
        ON s.saloon_id = saloon.id
        JOIN public.movie movie
@@ -111,7 +111,6 @@ export class TicketService {
     const path = join(tempPath, fileName);
 
     await this.#preparePDF(path, tickets);
-
 
     const file = createReadStream(path);
 
@@ -152,7 +151,6 @@ export class TicketService {
           [me.id, data.seatNumbers[i]],
         );
 
-
         if (result[1] === 0) {
           throw new BadRequestException(`seat already taken`);
         }
@@ -182,28 +180,31 @@ export class TicketService {
   }
 
   async getMyTickets(me: User, query: ticketQueryDto) {
-    const take = query.limit || 10;
     const page = query.page || 0;
+    const limit = query.limit || 10;
 
     const tickets = await this.dataSource.manager.query(
       `SELECT t.id as id, t.user_id as user_id, t.user_name as user_name,
-       t.sans_id as sans_id, t.seatnumber as seatnumber, t.price as price, s.start_t,
-       s.end_t, saloon.name as saloon_name, movie.name as movie_Name, u.name as user_name
-       FROM public.ticket t
-       JOIN public.sans s
-       ON t.sans_id = s.id
-       JOIN public.saloon saloon
-       ON s.saloon_id = saloon.id
-       JOIN public.movie movie
-       ON s.movie_id = movie.id
-       JOIN public.user u
-       ON t.user_id = u.id 
-       WHERE (t.sans_id = $1) AND (t.user_id = $2)`,
-      [query.sansId, me.id],
+      t.sans_id as sans_id, t.seatnumber as seatnumber, t.price as price, s.start_t as start,
+      s.end_t as end, saloon.name as saloon_name, movie.name as movie_Name, u.name as name
+      FROM public.ticket t
+      JOIN public.sans s
+      ON t.sans_id = s.id  
+      JOIN public.saloon saloon
+      ON s.saloon_id = saloon.id
+      JOIN public.movie movie
+      ON s.movie_id = movie.id
+      JOIN public.user u
+      ON t.user_id = u.id
+      WHERE (t.sans_id = $1) AND (t.user_id = $2)
+      OFFSET $3 ROWS FETCH NEXT $4 ROWS ONLY;`,
+      [query.sansId, me.id, page * limit, limit],
     );
 
+
+    if (tickets.length === 0)
+      throw new BadRequestException('there is not any tickets');
 
     return tickets.map(this.#convertToTicketDTO);
   }
 }
-

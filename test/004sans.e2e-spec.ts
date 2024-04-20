@@ -15,12 +15,6 @@ let endtDate = new Date(
 ).toISOString();
 
 describe('saloonController (e2e)', () => {
-  it('/ (GET)', () => {
-    return request(app.getHttpServer())
-      .get('/')
-      .expect(200)
-      .expect('Hello World!');
-  });
 
   it('successfuly create saloon if information is correct', async () => {
     const token = GetContext('token1');
@@ -36,7 +30,7 @@ describe('saloonController (e2e)', () => {
 
     expect(x.statusCode).toBe(201);
 
-    SetContext('saloonId', x.body.id);
+    SetContext('saloonId1', x.body.id);
   });
 });
 
@@ -48,7 +42,7 @@ describe('movieController (e2e)', () => {
       .expect('Hello World!');
   }, 30000);
 
-  it('successful if admin give sufficient information ', async () => {
+  it('successfuly create movie if admin give sufficient information ', async () => {
     const token = GetContext('token1');
 
     expect.assertions(1);
@@ -61,8 +55,8 @@ describe('movieController (e2e)', () => {
         slug: 'tt15398776',
       });
 
-    SetContext('movieId', x.body.id);
-    SetContext('movieName', x.body.name);
+    SetContext('movieId1', x.body.id);
+    SetContext('movieName1', x.body.name);
 
     expect(x.statusCode).toBe(201);
   });
@@ -77,12 +71,11 @@ describe('sansController (e2e)', () => {
   });
 
   it('successfuly create sans if information is correct', async () => {
-    jest.setTimeout(30000);
     const token = GetContext('token1');
     expect.assertions(1);
 
-    const saloonId = await GetContext('saloonId');
-    const movieId = await GetContext('movieId');
+    const saloonId = await GetContext('saloonId1');
+    const movieId = await GetContext('movieId1');
 
     const x = await request(app.getHttpServer())
       .post(`/sans/create`)
@@ -94,7 +87,7 @@ describe('sansController (e2e)', () => {
         end_t: endtDate,
       });
 
-    SetContext('sansId', x.body[0].id);
+    SetContext('sansId1', x.body[0].id);
 
     expect(x.statusCode).toBe(201);
   });
@@ -229,7 +222,7 @@ describe('sansController (e2e)', () => {
 
     expect.assertions(1);
 
-    const getSansId = GetContext('sansId');
+    const getSansId = GetContext('sansId1');
 
     const x = await request(app.getHttpServer())
       .get(`/sans/${getSansId}`)
@@ -274,7 +267,7 @@ describe('sansController (e2e)', () => {
 
     expect.assertions(1);
 
-    const sansId = GetContext('sansId');
+    const sansId = GetContext('sansId1');
 
     const x = await request(app.getHttpServer())
       .get(`/sans/${sansId}`)
@@ -289,7 +282,7 @@ describe('sansController (e2e)', () => {
 
     expect.assertions(1);
 
-    const movieId = GetContext('movieId');
+    const movieId = GetContext('movieId1');
 
     const x = await request(app.getHttpServer())
       .get(`/sans/sansByMovie/${movieId}`)

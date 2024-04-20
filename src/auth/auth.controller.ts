@@ -26,6 +26,10 @@ import { UserQueryDto } from './dtos/UsersQuery.dto';
 import { AuthAdminGuard } from './gaurds/auth-admin.gaurd';
 import { responseAllUsers } from './dtos/response.users.dto';
 import { accountDto } from './dtos/account.dto';
+import {
+  resetPassword_stepOne_dto,
+  resetPassword_stepTwo_dto,
+} from './dtos/password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -56,7 +60,7 @@ export class AuthController {
     type: responseEditProfile,
   })
   @Post('/edit')
-  editProfile(@Me() me:User , @Body() body: editProfileDto) {
+  editProfile(@Me() me: User, @Body() body: editProfileDto) {
     return this.authService.editprofile(me.id, body);
   }
 
@@ -112,11 +116,19 @@ export class AuthController {
     return this.authService.auth_admin_step_two(body);
   }
 
-
   @UseGuards(AuthGuard)
   @Post('/addToAccount')
-  addToAccount(@Me() me:User,@Body() body:accountDto) {
-    return this.authService.addToaccount(me,body)
+  addToAccount(@Me() me: User, @Body() body: accountDto) {
+    return this.authService.addToaccount(me, body);
   }
 
+  @Post('/resetPassword-step-one')
+  reSetPass(@Body() body: resetPassword_stepOne_dto) {
+    return this.authService.resetPass1(body);
+  }
+
+  @Post('/resetPassword-step-two')
+  resetPass2(@Body() body: resetPassword_stepTwo_dto) {
+    return this.authService.resetPass2(body)
+  }
 }

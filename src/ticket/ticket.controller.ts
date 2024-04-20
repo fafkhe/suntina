@@ -24,7 +24,7 @@ export class TicketController {
     return this.ticketService.getMyTickets(me, query);
   }
 
-  // @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard)
   @Get('/pdf')
   pdfRunner(@Query() query: ticketQueryDto, @Me() me: User) {
     return this.ticketService.pdf(query, null);

@@ -130,12 +130,7 @@ export class SansService {
         WHERE s.id = $1 AND s.start_t > Now()`,
       [id],
     );
-
-    console.log(thisSans, "salam man singlesansam")
     
-    console.log(id,"//////////////////////////////////////////////////")
-
-
     if (!thisSans) throw new NotFoundException('not found');
 
     if (new Date(thisSans.start_t).getTime() < Date.now())

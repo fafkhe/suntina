@@ -13,7 +13,7 @@ const transporter = nodemailer.createTransport({
     pass: 'peivydxksbsmaxzi',
   },
 });
-export async function sendEmail(email:string,code:string) {
+export async function sendEmail(email: string, code: string) {
   const info = await transporter.sendMail({
     from: 'fatemeh.khorshidvand1@gmail.com',
     to: email,
@@ -22,4 +22,3 @@ export async function sendEmail(email:string,code:string) {
   });
   console.log('Message sent: %s', info.messageId);
 }
-

@@ -27,7 +27,7 @@ export function GetContext(key: string): any {
 }
 
 export function printContext() {
-  console.log(context)
+  console.log(context);
 }
 
 function generateNumericString(length: number) {
@@ -306,5 +306,21 @@ describe('Auth (e2e)', () => {
 
     expect(x.body.message).toBe('Forbidden resource');
     expect(x.statusCode).toBe(403);
+  });
+
+  //addToAccount
+  it('charge balance', async () => {
+    const token = GetContext('token');
+    expect.assertions(1);
+
+    const x = await request(app.getHttpServer())
+      .post(`/auth/addToAccount`)
+      .set('auth', `ut ${token}`)
+      .send({
+        balance: 1000,
+      });
+
+    expect(x.text).toBe('ok')
+    
   });
 });
